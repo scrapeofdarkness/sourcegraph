@@ -5,13 +5,11 @@ import {
     DocumentSelector,
     Hover,
     HoverProvider,
-    ImplementationProvider,
     Location,
     LocationProvider,
     ReferenceContext,
     ReferenceProvider,
     Subscribable,
-    TypeDefinitionProvider,
 } from 'sourcegraph'
 import { ClientLanguageFeaturesAPI } from '../../client/api/languageFeatures'
 import { ProviderMap, toProviderResultObservable } from './common'
@@ -26,16 +24,6 @@ export interface ExtLanguageFeaturesAPI {
         position: clientType.Position
     ): Observable<clientType.Hover | null | undefined>
     $observeDefinition(
-        id: number,
-        resource: string,
-        position: clientType.Position
-    ): Observable<clientType.Location[] | null | undefined>
-    $observeTypeDefinition(
-        id: number,
-        resource: string,
-        position: clientType.Position
-    ): Observable<clientType.Location[] | null | undefined>
-    $observeImplementation(
         id: number,
         resource: string,
         position: clientType.Position
@@ -55,14 +43,9 @@ export interface ExtLanguageFeaturesAPI {
 
 /** @internal */
 export class ExtLanguageFeatures implements ExtLanguageFeaturesAPI, Unsubscribable {
-    private registrations = new ProviderMap<
-        | HoverProvider
-        | DefinitionProvider
-        | TypeDefinitionProvider
-        | ImplementationProvider
-        | ReferenceProvider
-        | LocationProvider
-    >(id => this.proxy.$unregister(id))
+    private registrations = new ProviderMap<HoverProvider | DefinitionProvider | ReferenceProvider | LocationProvider>(
+        id => this.proxy.$unregister(id)
+    )
 
     constructor(private proxy: ClientLanguageFeaturesAPI, private documents: ExtDocuments) {}
 
@@ -107,56 +90,6 @@ export class ExtLanguageFeatures implements ExtLanguageFeaturesAPI, Unsubscribab
     public registerDefinitionProvider(selector: DocumentSelector, provider: DefinitionProvider): Unsubscribable {
         const { id, subscription } = this.registrations.add(provider)
         this.proxy.$registerDefinitionProvider(id, selector)
-        return subscription
-    }
-
-    public $observeTypeDefinition(
-        id: number,
-        resource: string,
-        position: clientType.Position
-    ): Observable<clientType.Location[] | null | undefined> {
-        const provider = this.registrations.get<TypeDefinitionProvider>(id)
-        return toProviderResultObservable(
-            this.documents
-                .getSync(resource)
-                .then<
-                    Location | Location[] | null | undefined | Subscribable<Location | Location[] | null | undefined>
-                >(document => provider.provideTypeDefinition(document, toPosition(position))),
-            toDefinition
-        )
-    }
-
-    public registerTypeDefinitionProvider(
-        selector: DocumentSelector,
-        provider: TypeDefinitionProvider
-    ): Unsubscribable {
-        const { id, subscription } = this.registrations.add(provider)
-        this.proxy.$registerTypeDefinitionProvider(id, selector)
-        return subscription
-    }
-
-    public $observeImplementation(
-        id: number,
-        resource: string,
-        position: clientType.Position
-    ): Observable<clientType.Location[] | null | undefined> {
-        const provider = this.registrations.get<ImplementationProvider>(id)
-        return toProviderResultObservable(
-            this.documents
-                .getSync(resource)
-                .then<
-                    Location | Location[] | null | undefined | Subscribable<Location | Location[] | null | undefined>
-                >(document => provider.provideImplementation(document, toPosition(position))),
-            toDefinition
-        )
-    }
-
-    public registerImplementationProvider(
-        selector: DocumentSelector,
-        provider: ImplementationProvider
-    ): Unsubscribable {
-        const { id, subscription } = this.registrations.add(provider)
-        this.proxy.$registerImplementationProvider(id, selector)
         return subscription
     }
 

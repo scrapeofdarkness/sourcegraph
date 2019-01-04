@@ -20,8 +20,6 @@ export interface ClientLanguageFeaturesAPI {
     $unregister(id: number): void
     $registerHoverProvider(id: number, selector: DocumentSelector): void
     $registerDefinitionProvider(id: number, selector: DocumentSelector): void
-    $registerTypeDefinitionProvider(id: number, selector: DocumentSelector): void
-    $registerImplementationProvider(id: number, selector: DocumentSelector): void
     $registerReferenceProvider(id: number, selector: DocumentSelector): void
 
     /**
@@ -44,14 +42,6 @@ export class ClientLanguageFeatures implements ClientLanguageFeaturesAPI {
             ProvideTextDocumentHoverSignature
         >,
         private definitionRegistry: FeatureProviderRegistry<
-            TextDocumentRegistrationOptions,
-            ProvideTextDocumentLocationSignature
-        >,
-        private typeDefinitionRegistry: FeatureProviderRegistry<
-            TextDocumentRegistrationOptions,
-            ProvideTextDocumentLocationSignature
-        >,
-        private implementationRegistry: FeatureProviderRegistry<
             TextDocumentRegistrationOptions,
             ProvideTextDocumentLocationSignature
         >,
@@ -85,32 +75,6 @@ export class ClientLanguageFeatures implements ClientLanguageFeaturesAPI {
                 { documentSelector: selector },
                 (params: TextDocumentPositionParams): Observable<Location | Location[]> =>
                     from(this.proxy.$observeDefinition(id, params.textDocument.uri, params.position)).pipe(
-                        map(result => result || [])
-                    )
-            )
-        )
-    }
-
-    public $registerTypeDefinitionProvider(id: number, selector: DocumentSelector): void {
-        this.registrations.add(
-            id,
-            this.typeDefinitionRegistry.registerProvider(
-                { documentSelector: selector },
-                (params: TextDocumentPositionParams): Observable<Location | Location[]> =>
-                    from(this.proxy.$observeTypeDefinition(id, params.textDocument.uri, params.position)).pipe(
-                        map(result => result || [])
-                    )
-            )
-        )
-    }
-
-    public $registerImplementationProvider(id: number, selector: DocumentSelector): void {
-        this.registrations.add(
-            id,
-            this.implementationRegistry.registerProvider(
-                { documentSelector: selector },
-                (params: TextDocumentPositionParams): Observable<Location | Location[]> =>
-                    from(this.proxy.$observeImplementation(id, params.textDocument.uri, params.position)).pipe(
                         map(result => result || [])
                     )
             )

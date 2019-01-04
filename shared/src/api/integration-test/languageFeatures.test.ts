@@ -43,39 +43,6 @@ describe('LanguageFeatures (integration)', () => {
                 position: { line: 1, character: 2 },
             })
     )
-    // tslint:disable deprecation The tests must remain until they are removed.
-    testLocationProvider(
-        'registerTypeDefinitionProvider',
-        extensionHost => extensionHost.languages.registerTypeDefinitionProvider,
-        label => ({
-            provideTypeDefinition: (doc: sourcegraph.TextDocument, pos: sourcegraph.Position) => [
-                { uri: new URI(`file:///${label}`) },
-            ],
-        }),
-        labeledDefinitionResults,
-        run => ({ provideTypeDefinition: run } as sourcegraph.TypeDefinitionProvider),
-        services =>
-            services.textDocumentTypeDefinition.getLocations({
-                textDocument: { uri: 'file:///f' },
-                position: { line: 1, character: 2 },
-            })
-    )
-    testLocationProvider<sourcegraph.ImplementationProvider>(
-        'registerImplementationProvider',
-        extensionHost => extensionHost.languages.registerImplementationProvider,
-        label => ({
-            provideImplementation: (doc: sourcegraph.TextDocument, pos: sourcegraph.Position) => [
-                { uri: new URI(`file:///${label}`) },
-            ],
-        }),
-        labeledDefinitionResults,
-        run => ({ provideImplementation: run } as sourcegraph.ImplementationProvider),
-        services =>
-            services.textDocumentImplementation.getLocations({
-                textDocument: { uri: 'file:///f' },
-                position: { line: 1, character: 2 },
-            })
-    )
     // tslint:enable deprecation
     testLocationProvider<sourcegraph.ReferenceProvider>(
         'registerReferenceProvider',

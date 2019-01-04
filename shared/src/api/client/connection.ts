@@ -107,8 +107,6 @@ export function createExtensionHostClientConnection(
             connection,
             services.textDocumentHover,
             services.textDocumentDefinition,
-            services.textDocumentTypeDefinition,
-            services.textDocumentImplementation,
             services.textDocumentReferences,
             services.textDocumentLocations
         )
