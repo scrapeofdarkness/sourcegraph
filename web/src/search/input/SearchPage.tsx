@@ -72,18 +72,24 @@ export class SearchPage extends React.Component<Props, State> {
                     }
                 />
                 <Form className="search search-page__container" onSubmit={this.onSubmit}>
-                    <div className="search-page__input-container">
-                        <QueryInput
-                            {...this.props}
-                            value={this.state.userQuery}
-                            onChange={this.onUserQueryChange}
-                            autoFocus={'cursor-at-end'}
-                            hasGlobalQueryBehavior={true}
-                        />
-                        <SearchButton />
-                    </div>
-                    {hasScopes ? (
+                    {this.state.showQueryBuilder ? (
                         <>
+                            <QueryBuilder
+                                onFieldsQueryChange={this.onBuilderQueryChange}
+                                isSourcegraphDotCom={window.context.sourcegraphDotComMode}
+                                onToggle={this.toggleQueryBuilder}
+                                showQueryBuilder={this.state.showQueryBuilder}
+                            />
+                            <div className="search-page__input-container">
+                                <QueryInput
+                                    {...this.props}
+                                    value={this.state.userQuery}
+                                    onChange={this.onUserQueryChange}
+                                    autoFocus={'cursor-at-end'}
+                                    hasGlobalQueryBehavior={true}
+                                />
+                                <SearchButton />
+                            </div>
                             <div className="search-page__input-sub-container">
                                 <SearchFilterChips
                                     location={this.props.location}
@@ -93,26 +99,56 @@ export class SearchPage extends React.Component<Props, State> {
                                     settingsCascade={this.props.settingsCascade}
                                 />
                             </div>
-                            <QueryBuilder
-                                onFieldsQueryChange={this.onBuilderQueryChange}
-                                isSourcegraphDotCom={window.context.sourcegraphDotComMode}
-                            />
                         </>
                     ) : (
                         <>
-                            <QueryBuilder
-                                onFieldsQueryChange={this.onBuilderQueryChange}
-                                isSourcegraphDotCom={window.context.sourcegraphDotComMode}
-                            />
-                            <div className="search-page__input-sub-container">
-                                <SearchFilterChips
-                                    location={this.props.location}
-                                    history={this.props.history}
-                                    query={this.state.userQuery}
-                                    authenticatedUser={this.props.authenticatedUser}
-                                    settingsCascade={this.props.settingsCascade}
+                            <div className="search-page__input-container">
+                                <QueryInput
+                                    {...this.props}
+                                    value={this.state.userQuery}
+                                    onChange={this.onUserQueryChange}
+                                    autoFocus={'cursor-at-end'}
+                                    hasGlobalQueryBehavior={true}
                                 />
+                                <SearchButton />
                             </div>
+                            {hasScopes ? (
+                                <>
+                                    <div className="search-page__input-sub-container">
+                                        <SearchFilterChips
+                                            location={this.props.location}
+                                            history={this.props.history}
+                                            query={this.state.userQuery}
+                                            authenticatedUser={this.props.authenticatedUser}
+                                            settingsCascade={this.props.settingsCascade}
+                                        />
+                                    </div>
+                                    <QueryBuilder
+                                        onFieldsQueryChange={this.onBuilderQueryChange}
+                                        isSourcegraphDotCom={window.context.sourcegraphDotComMode}
+                                        onToggle={this.toggleQueryBuilder}
+                                        showQueryBuilder={this.state.showQueryBuilder}
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <QueryBuilder
+                                        onFieldsQueryChange={this.onBuilderQueryChange}
+                                        isSourcegraphDotCom={window.context.sourcegraphDotComMode}
+                                        onToggle={this.toggleQueryBuilder}
+                                        showQueryBuilder={this.state.showQueryBuilder}
+                                    />
+                                    <div className="search-page__input-sub-container">
+                                        <SearchFilterChips
+                                            location={this.props.location}
+                                            history={this.props.history}
+                                            query={this.state.userQuery}
+                                            authenticatedUser={this.props.authenticatedUser}
+                                            settingsCascade={this.props.settingsCascade}
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </>
                     )}
                 </Form>
@@ -156,5 +192,9 @@ export class SearchPage extends React.Component<Props, State> {
                 this.props.settingsCascade.final['search.scopes']) ||
             []
         return allScopes
+    }
+
+    private toggleQueryBuilder = () => {
+        this.setState(({ showQueryBuilder }) => ({ showQueryBuilder: !showQueryBuilder }))
     }
 }

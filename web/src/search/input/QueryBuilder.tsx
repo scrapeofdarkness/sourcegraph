@@ -9,6 +9,8 @@ interface Props {
      */
     onFieldsQueryChange: (query: string) => void
     isSourcegraphDotCom: boolean
+    onToggle: () => void
+    showQueryBuilder: boolean
 }
 
 interface QueryFields {
@@ -77,11 +79,11 @@ export class QueryBuilder extends React.Component<Props, QueryBuilderState> {
             <>
                 <div className="query-builder__toggle">
                     <a href="" onClick={this.toggleShowQueryBuilder} data-testid="test-query-builder-toggle">
-                        {!!this.state.showQueryBuilder ? 'Hide' : 'Show'} search options
+                        {!!this.props.showQueryBuilder ? 'Hide' : 'Show'} search options
                     </a>
                 </div>
 
-                {this.state.showQueryBuilder && (
+                {this.props.showQueryBuilder && (
                     <div className="query-builder">
                         <div className="query-builder__header">
                             <h3 className="query-builder__header-input">Match:</h3>
@@ -113,6 +115,45 @@ export class QueryBuilder extends React.Component<Props, QueryBuilderState> {
                                     <div className="query-builder__row-example" />
                                 </div>
                             </div>
+                            {(this.state.typeOfSearch === 'commit' || this.state.typeOfSearch === 'diff') && (
+                                <>
+                                    <QueryBuilderInputRow
+                                        onInputChange={this.onInputChange}
+                                        placeholder="alice"
+                                        title="Author"
+                                        description="Only include results from diffs or commits authored by a user."
+                                        isSourcegraphDotCom={this.props.isSourcegraphDotCom}
+                                        shortName="author"
+                                    />
+                                    <QueryBuilderInputRow
+                                        onInputChange={this.onInputChange}
+                                        placeholder="1 year ago"
+                                        title="Before"
+                                        description="Only include results from diffs or commits before the specified time."
+                                        isSourcegraphDotCom={this.props.isSourcegraphDotCom}
+                                        shortName="before"
+                                    />
+                                    <QueryBuilderInputRow
+                                        onInputChange={this.onInputChange}
+                                        placeholder="6 months ago"
+                                        title="After"
+                                        description="Only include results from diffs or commits after the specified time."
+                                        isSourcegraphDotCom={this.props.isSourcegraphDotCom}
+                                        shortName="after"
+                                    />
+                                    {this.state.typeOfSearch === 'diff' && (
+                                        <QueryBuilderInputRow
+                                            onInputChange={this.onInputChange}
+                                            placeholder="fix: typo"
+                                            title="Message"
+                                            description="Only include results from diffs which have commit messages containing the string."
+                                            isSourcegraphDotCom={this.props.isSourcegraphDotCom}
+                                            shortName="message"
+                                        />
+                                    )}
+                                </>
+                            )}
+                            <hr className="query-builder__rule" />
                             <QueryBuilderInputRow
                                 onInputChange={this.onInputChange}
                                 placeholder="(open|close) file"
@@ -154,20 +195,6 @@ export class QueryBuilder extends React.Component<Props, QueryBuilderState> {
                                     <div className="query-builder__row-example" />
                                 </div>
                             </div>
-                            {this.state.typeOfSearch === 'diff' && (
-                                <>
-                                    {this.state.typeOfSearch === 'diff' && (
-                                        <QueryBuilderInputRow
-                                            onInputChange={this.onInputChange}
-                                            placeholder="fix: typo"
-                                            title="Message"
-                                            description="Only include results from diffs which have commit messages containing the string."
-                                            isSourcegraphDotCom={this.props.isSourcegraphDotCom}
-                                            shortName="message"
-                                        />
-                                    )}
-                                </>
-                            )}
                         </div>
                         <div className="query-builder__header">
                             <h3 className="query-builder__header-input">Search scope:</h3>
@@ -198,34 +225,6 @@ export class QueryBuilder extends React.Component<Props, QueryBuilderState> {
                                 shortName="language"
                                 description="Only include results from files in the specified programming language."
                             />
-                            {(this.state.typeOfSearch === 'commit' || this.state.typeOfSearch === 'diff') && (
-                                <>
-                                    <QueryBuilderInputRow
-                                        onInputChange={this.onInputChange}
-                                        placeholder="alice"
-                                        title="Author"
-                                        description="Only include results from diffs or commits authored by a user."
-                                        isSourcegraphDotCom={this.props.isSourcegraphDotCom}
-                                        shortName="author"
-                                    />
-                                    <QueryBuilderInputRow
-                                        onInputChange={this.onInputChange}
-                                        placeholder="1 year ago"
-                                        title="Before"
-                                        description="Only include results from diffs or commits before the specified time."
-                                        isSourcegraphDotCom={this.props.isSourcegraphDotCom}
-                                        shortName="before"
-                                    />
-                                    <QueryBuilderInputRow
-                                        onInputChange={this.onInputChange}
-                                        placeholder="6 months ago"
-                                        title="After"
-                                        description="Only include results from diffs or commits after the specified time."
-                                        isSourcegraphDotCom={this.props.isSourcegraphDotCom}
-                                        shortName="after"
-                                    />
-                                </>
-                            )}
                         </div>
                         <div className="query-builder__docs-link">
                             <a href={`${docsURLPrefix}/user/search/queries`}>View all search options in docs</a>
@@ -238,8 +237,10 @@ export class QueryBuilder extends React.Component<Props, QueryBuilderState> {
 
     private toggleShowQueryBuilder = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault()
-        this.setState({ showQueryBuilder: !this.state.showQueryBuilder })
+        // this.setState({ showQueryBuilder: !this.state.showQueryBuilder })
+        this.props.onToggle()
     }
+
     private onTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         this.onInputChange('type')(event)
 
