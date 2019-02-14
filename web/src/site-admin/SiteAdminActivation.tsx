@@ -59,7 +59,9 @@ export const fetchSiteAdminChecklist: () => Observable<SiteAdminChecklistInfo> =
         })
     )
 
-type SiteAdminActivationPopoverButtonProps = CommandListProps & { history: H.History }
+interface SiteAdminActivationPopoverButtonProps extends CommandListProps {
+    history: H.History
+}
 interface SiteAdminActivationPopoverButtonState {
     checklistInfo?: SiteAdminChecklistInfo
 }
