@@ -233,7 +233,7 @@ class ChecklistItem extends React.PureComponent<ChecklistItemProps, ChecklistIte
 
     private toggleDetail = (e: React.MouseEvent<HTMLSpanElement>) => {
         e.stopPropagation()
-        this.setState({ showDetail: !this.state.showDetail })
+        this.setState(state => ({ showDetail: !state.showDetail }))
     }
 
     public render(): JSX.Element {
