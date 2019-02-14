@@ -252,7 +252,7 @@ class ChecklistItem extends React.PureComponent<ChecklistItemProps, ChecklistIte
                         <InformationOutlineIcon className="icon-inline" />
                     </span>
                 </p>
-                <p className={'item-detail' + (this.state.showDetail ? ' show' : ' hide')}>{this.props.detail}</p>
+                <p className={`item-detail ${this.state.showDetail ? 'show' : 'hide'}`}>{this.props.detail}</p>
             </div>
         )
     }
