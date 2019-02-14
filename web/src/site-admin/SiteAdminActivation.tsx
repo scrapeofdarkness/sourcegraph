@@ -23,7 +23,10 @@ export interface SiteAdminChecklistInfo {
 /**
  * percentageDone returns the percent of activation checklist items completed.
  */
-export const percentageDone = (info: SiteAdminChecklistInfo): number => {
+export const percentageDone = (info?: SiteAdminChecklistInfo): number => {
+    if (!info) {
+        return 0
+    }
     const vals = Object.values(info)
     return (100 * vals.filter(e => e).length) / vals.length
 }
