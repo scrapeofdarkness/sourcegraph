@@ -6,8 +6,8 @@ import RocketIcon from 'mdi-react/RocketIcon'
 import CircularProgressbar from 'react-circular-progressbar'
 
 import * as React from 'react'
-import { Observable, Subscription } from 'rxjs'
-import { map } from 'rxjs/operators'
+import { Observable, Subject, Subscription } from 'rxjs'
+import { map, switchMap } from 'rxjs/operators'
 import { Props as CommandListProps } from '../../../shared/src/commandPalette/CommandList'
 import { PopoverButton } from '../../../shared/src/components/PopoverButton'
 import { dataAndErrors, dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
@@ -33,44 +33,50 @@ export const percentageDone = (info?: SiteAdminChecklistInfo): number => {
     return (100 * vals.filter(e => e).length) / vals.length
 }
 
+export const refreshUserActivation = new Subject<null>()
+
 /**
- * fetchSiteAdminChecklist fetches the site admin activation checklist.
+ * The up-to-date site admin checklist
  */
-export const fetchSiteAdminChecklist: () => Observable<SiteAdminChecklistInfo> = () =>
-    queryGraphQL(gql`
-        query {
-            externalServices {
-                totalCount
-            }
-            repositories(enabled: true) {
-                totalCount
-            }
-            viewerSettings {
-                final
-            }
-            currentUser {
-                usageStatistics {
-                    searchQueries
-                    codeIntelligenceActions
+export const siteAdminChecklist: Observable<SiteAdminChecklistInfo> = refreshUserActivation.pipe(
+    switchMap(() =>
+        queryGraphQL(gql`
+            query {
+                externalServices {
+                    totalCount
+                }
+                repositories(enabled: true) {
+                    totalCount
+                }
+                viewerSettings {
+                    final
+                }
+                currentUser {
+                    usageStatistics {
+                        searchQueries
+                        codeIntelligenceActions
+                    }
                 }
             }
-        }
-    `).pipe(
-        map(dataOrThrowErrors),
-        map(data => {
-            const settings = JSON.parse(data.viewerSettings.final)
-            const authProviders = window.context.authProviders
-            return {
-                connectedCodeHost: data.externalServices.totalCount > 0,
-                enabledRepository: data.repositories.totalCount !== null && data.repositories.totalCount > 0,
-                enabledExtension:
-                    settings.extensions && Object.values(settings.extensions).filter(enabled => enabled).length > 0,
-                enabledSignOn: !!(authProviders && authProviders.filter(p => !p.isBuiltin).length > 0),
-                didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
-                didCodeIntelligence: !!data.currentUser && data.currentUser.usageStatistics.codeIntelligenceActions > 0,
-            }
-        })
+        `).pipe(
+            map(dataOrThrowErrors),
+            map(data => {
+                const settings = JSON.parse(data.viewerSettings.final)
+                const authProviders = window.context.authProviders
+                return {
+                    connectedCodeHost: data.externalServices.totalCount > 0,
+                    enabledRepository: data.repositories.totalCount !== null && data.repositories.totalCount > 0,
+                    enabledExtension:
+                        settings.extensions && Object.values(settings.extensions).filter(enabled => enabled).length > 0,
+                    enabledSignOn: !!(authProviders && authProviders.filter(p => !p.isBuiltin).length > 0),
+                    didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
+                    didCodeIntelligence:
+                        !!data.currentUser && data.currentUser.usageStatistics.codeIntelligenceActions > 0,
+                }
+            })
+        )
     )
+)
 
 export const fetchReferencesLink: () => Observable<string | null> = () =>
     queryGraphQL(gql`
@@ -138,10 +144,11 @@ export class SiteAdminActivationPopoverButton extends React.PureComponent<
 
     public componentDidMount(): void {
         this.subscriptions.add(
-            fetchSiteAdminChecklist().subscribe(checklistInfo => {
+            siteAdminChecklist.subscribe(checklistInfo => {
                 this.setState({ checklistInfo })
             })
         )
+        refreshUserActivation.next(null)
     }
 
     public componentWillUnmount(): void {

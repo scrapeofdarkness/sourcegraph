@@ -20,12 +20,7 @@ import { queryGraphQL } from '../backend/graphql'
 import { OverviewItem, OverviewList } from '../components/Overview'
 import { PageTitle } from '../components/PageTitle'
 import { eventLogger } from '../tracking/eventLogger'
-import {
-    fetchSiteAdminChecklist,
-    percentageDone,
-    SiteAdminChecklist,
-    SiteAdminChecklistInfo,
-} from './SiteAdminActivation'
+import { siteAdminChecklist, percentageDone, SiteAdminChecklist, SiteAdminChecklistInfo } from './SiteAdminActivation'
 import { SiteAdminManagementConsolePassword } from './SiteAdminManagementConsolePassword'
 import { UsageChart } from './SiteAdminUsageStatisticsPage'
 
@@ -104,7 +99,7 @@ export class SiteAdminOverviewPage extends React.Component<Props, State> {
             fetchWeeklyActiveUsers().subscribe(stats => this.setState({ stats }), error => this.setState({ error }))
         )
         this.subscriptions.add(
-            fetchSiteAdminChecklist().subscribe(onboardingChecklist => this.setState({ onboardingChecklist }))
+            siteAdminChecklist.subscribe(onboardingChecklist => this.setState({ onboardingChecklist }))
         )
     }
 

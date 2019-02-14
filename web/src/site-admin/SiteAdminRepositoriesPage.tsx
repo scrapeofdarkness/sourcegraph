@@ -24,6 +24,7 @@ import {
     updateAllMirrorRepositories,
     updateMirrorRepository,
 } from './backend'
+import { refreshUserActivation } from './SiteAdminActivation'
 
 interface RepositoryNodeProps {
     node: GQL.IRepository
@@ -117,8 +118,15 @@ class RepositoryNode extends React.PureComponent<RepositoryNodeProps, Repository
         )
     }
 
-    private enableRepository = () => this.setRepositoryEnabled(true)
-    private disableRepository = () => this.setRepositoryEnabled(false)
+    private enableRepository = () => {
+        refreshUserActivation.next(null)
+        this.setRepositoryEnabled(true)
+    }
+
+    private disableRepository = () => {
+        refreshUserActivation.next(null)
+        this.setRepositoryEnabled(false)
+    }
 
     private setRepositoryEnabled(enabled: boolean): void {
         this.setState({
