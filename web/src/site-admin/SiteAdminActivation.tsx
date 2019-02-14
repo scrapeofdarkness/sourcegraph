@@ -10,7 +10,7 @@ import { Observable, Subscription } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Props as CommandListProps } from '../../../shared/src/commandPalette/CommandList'
 import { PopoverButton } from '../../../shared/src/components/PopoverButton'
-import { dataOrThrowErrors, gql, dataAndErrors } from '../../../shared/src/graphql/graphql'
+import { dataAndErrors, dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
 import { queryGraphQL } from '../backend/graphql'
 
 export interface SiteAdminChecklistInfo {
@@ -215,10 +215,7 @@ export class SiteAdminChecklist extends React.PureComponent<SiteAdminChecklistPr
         this.props.history.push('/search')
     }
     private findReferences = () => {
-        console.log('# HERE')
-        fetchReferencesLink().subscribe(r => {
-            console.log('# references link:', r)
-        })
+        fetchReferencesLink().subscribe(r => r && this.props.history.push(r))
     }
     private enableSignOn = () => {
         window.open('https://docs.sourcegraph.com/admin/auth', '_blank')
@@ -258,7 +255,7 @@ export class SiteAdminChecklist extends React.PureComponent<SiteAdminChecklistPr
                                 title="Find references"
                                 done={this.props.checklistInfo.enabledRepository}
                                 action={this.findReferences}
-                                detail="Complete a &ldquo;find-references&rdquo; action on your code"
+                                detail="To find references of a token, navigate to a code file in one of your repositories, hover over a token to activate the tooltip, and then click &ldquo;Find references&rdquo;."
                             />
                         </li>
                         <li>
