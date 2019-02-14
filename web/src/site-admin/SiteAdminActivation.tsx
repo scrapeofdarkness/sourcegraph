@@ -10,7 +10,7 @@ import { Observable, Subscription } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Props as CommandListProps } from '../../../shared/src/commandPalette/CommandList'
 import { PopoverButton } from '../../../shared/src/components/PopoverButton'
-import { dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
+import { dataOrThrowErrors, gql, dataAndErrors } from '../../../shared/src/graphql/graphql'
 import { queryGraphQL } from '../backend/graphql'
 
 export interface SiteAdminChecklistInfo {
@@ -18,6 +18,8 @@ export interface SiteAdminChecklistInfo {
     enabledRepository: boolean
     enabledExtension: boolean
     enabledSignOn: boolean
+    didSearch: boolean
+    didCodeIntelligence: boolean
 }
 
 /**
@@ -46,6 +48,12 @@ export const fetchSiteAdminChecklist: () => Observable<SiteAdminChecklistInfo> =
             viewerSettings {
                 final
             }
+            currentUser {
+                usageStatistics {
+                    searchQueries
+                    codeIntelligenceActions
+                }
+            }
         }
     `).pipe(
         map(dataOrThrowErrors),
@@ -58,7 +66,42 @@ export const fetchSiteAdminChecklist: () => Observable<SiteAdminChecklistInfo> =
                 enabledExtension:
                     settings.extensions && Object.values(settings.extensions).filter(enabled => enabled).length > 0,
                 enabledSignOn: !!(authProviders && authProviders.filter(p => !p.isBuiltin).length > 0),
+                didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
+                didCodeIntelligence: !!data.currentUser && data.currentUser.usageStatistics.codeIntelligenceActions > 0,
             }
+        })
+    )
+
+export const fetchReferencesLink: () => Observable<string | null> = () =>
+    queryGraphQL(gql`
+        query {
+            repositories(enabled: true, cloned: true, first: 100, indexed: true) {
+                nodes {
+                    url
+                    gitRefs {
+                        totalCount
+                    }
+                }
+            }
+        }
+    `).pipe(
+        map(dataAndErrors),
+        map(dataAndErrors => {
+            if (!dataAndErrors.data) {
+                return null
+            }
+            const data = dataAndErrors.data
+            if (!data.repositories.nodes) {
+                return null
+            }
+            const rURLs = data.repositories.nodes
+                .filter(r => r.gitRefs && r.gitRefs.totalCount > 0)
+                .sort(r => (r.gitRefs ? -r.gitRefs.totalCount : 0))
+                .map(r => r.url)
+            if (rURLs.length === 0) {
+                return null
+            }
+            return rURLs[0]
         })
     )
 
@@ -87,6 +130,8 @@ export class SiteAdminActivationPopoverButton extends React.PureComponent<
                 enabledRepository: false,
                 enabledExtension: false,
                 enabledSignOn: false,
+                didSearch: false,
+                didCodeIntelligence: false,
             },
         }
     }
@@ -166,8 +211,14 @@ export class SiteAdminChecklist extends React.PureComponent<SiteAdminChecklistPr
     private enableRepos = () => {
         this.props.history.push('/site-admin/repositories')
     }
-    private enableExtension = () => {
-        this.props.history.push('/extensions')
+    private searchCode = () => {
+        this.props.history.push('/search')
+    }
+    private findReferences = () => {
+        console.log('# HERE')
+        fetchReferencesLink().subscribe(r => {
+            console.log('# references link:', r)
+        })
     }
     private enableSignOn = () => {
         window.open('https://docs.sourcegraph.com/admin/auth', '_blank')
@@ -196,10 +247,18 @@ export class SiteAdminChecklist extends React.PureComponent<SiteAdminChecklistPr
                         </li>
                         <li>
                             <ChecklistItem
-                                title="Enable an extension"
-                                done={this.props.checklistInfo.enabledExtension}
-                                action={this.enableExtension}
-                                detail="Enable a Sourcegraph extension to add jump-to-def, find-refs, or helpful annotations from 3rd party dev tools."
+                                title="Search your code"
+                                done={this.props.checklistInfo.didSearch}
+                                action={this.searchCode}
+                                detail="Issue a search query over your code."
+                            />
+                        </li>
+                        <li>
+                            <ChecklistItem
+                                title="Find references"
+                                done={this.props.checklistInfo.enabledRepository}
+                                action={this.findReferences}
+                                detail="Complete a &ldquo;find-references&rdquo; action on your code"
                             />
                         </li>
                         <li>

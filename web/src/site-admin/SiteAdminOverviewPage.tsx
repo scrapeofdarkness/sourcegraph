@@ -36,13 +36,13 @@ interface Props {
 }
 
 interface State {
-    info?: OverviewInfo
+    info?: ActivationInfo
     stats?: GQL.ISiteUsageStatistics
     error?: Error
     onboardingChecklist?: SiteAdminChecklistInfo
 }
 
-const fetchOverview: () => Observable<OverviewInfo> = () =>
+const fetchOverview: () => Observable<ActivationInfo> = () =>
     queryGraphQL(gql`
         query Overview {
             repositories {
@@ -279,7 +279,7 @@ export class SiteAdminOverviewPage extends React.Component<Props, State> {
     }
 }
 
-interface OverviewInfo {
+interface ActivationInfo {
     repositories: number | null
     users: number
     orgs: number
