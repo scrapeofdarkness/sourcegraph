@@ -13,6 +13,9 @@
     width: 100%;
     overflow: auto;
 
+	padding-bottom: 4rem;
+	background-color: #04070E;
+
     &__logo {
         flex: 0 0 auto;
         display: flex;
@@ -40,6 +43,9 @@
         display: block;
         margin: 0.5rem 0;
     }
+	&__input-container {
+		width: calc(100% + 34px);
+	}
 }
 
 .theme-light {
@@ -47,5 +53,6 @@
         &__sign-in {
             color: $color-light-text-4;
         }
+		background-color: #FBFDFF;
     }
 }

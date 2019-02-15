@@ -1,0 +1,2 @@
+const reminder = 'sample';
+console.log(reminder);

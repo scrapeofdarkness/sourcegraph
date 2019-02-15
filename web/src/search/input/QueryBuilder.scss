@@ -1,4 +1,24 @@
+
+
 .query-builder {
+	h3, label {
+		letter-spacing: .015rem;
+	}
+	max-height: 0;
+	overflow: hidden;
+
+	/* Set our transitions up. */
+	-webkit-transition: max-height 0.3s;
+	-moz-transition: max-height 0.3s;
+	transition: max-height 0.3s ease;
+	padding-bottom: 0;
+
+	&-open {
+		max-height: 1000px;
+		padding-bottom: 2rem;
+	}
+
+
     border-radius: 0.25rem;
     width: 100%;
     margin-top: 1rem;
@@ -24,9 +44,9 @@
         border: 1px solid $input-border-color;
         border-radius: 0.125rem;
         padding: 1rem;
-
+		background-color: #0e121b;
         &--purple {
-            box-shadow: 0 16px 36px -6px rgba(188, 39, 202, 0.14);
+            box-shadow: 0 16px 36px -6px rgba(13, 100, 255, 0.14);
         }
 
         &--blue {
@@ -64,7 +84,7 @@
 
         &-input {
             flex: 1 1 auto;
-            padding-right: 1rem;
+            // padding-right: 1rem;
         }
 
         &-example {
@@ -102,6 +122,8 @@
 .theme-light {
     .query-builder {
         &__section {
+			background-color: #ffffff;
+
             &--blue {
                 box-shadow: 0 12px 25px -8px rgba(22, 155, 249, 0.08);
             }

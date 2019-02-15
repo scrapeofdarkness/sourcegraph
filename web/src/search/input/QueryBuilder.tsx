@@ -77,14 +77,7 @@ export class QueryBuilder extends React.Component<Props, QueryBuilderState> {
         const docsURLPrefix = this.props.isSourcegraphDotCom ? 'https://docs.sourcegraph.com' : '/help'
         return (
             <>
-                <div className="query-builder__toggle">
-                    <a href="" onClick={this.toggleShowQueryBuilder} data-testid="test-query-builder-toggle">
-                        {!!this.props.showQueryBuilder ? 'Hide' : 'Show'} search options
-                    </a>
-                </div>
-
-                {this.props.showQueryBuilder && (
-                    <div className="query-builder">
+                    <div className={!!this.props.showQueryBuilder ? 'query-builder query-builder-open' : 'query-builder'}>
                         <div className="query-builder__header">
                             <h3 className="query-builder__header-input">Match:</h3>
                         </div>
@@ -226,11 +219,7 @@ export class QueryBuilder extends React.Component<Props, QueryBuilderState> {
                                 description="Only include results from files in the specified programming language."
                             />
                         </div>
-                        <div className="query-builder__docs-link">
-                            <a href={`${docsURLPrefix}/user/search/queries`}>View all search options in docs</a>
-                        </div>
                     </div>
-                )}
             </>
         )
     }

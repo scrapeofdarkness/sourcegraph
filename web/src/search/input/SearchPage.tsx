@@ -72,7 +72,6 @@ export class SearchPage extends React.Component<Props, State> {
                     }
                 />
                 <Form className="search search-page__container" onSubmit={this.onSubmit}>
-                    {this.state.showQueryBuilder ? (
                         <>
                             <QueryBuilder
                                 onFieldsQueryChange={this.onBuilderQueryChange}
@@ -87,70 +86,21 @@ export class SearchPage extends React.Component<Props, State> {
                                     onChange={this.onUserQueryChange}
                                     // autoFocus={'cursor-at-end'}
                                     hasGlobalQueryBehavior={true}
+									placeholder={!!this.state.showQueryBuilder ? 'Additional search input' : 'Search code...'}
                                 />
                                 <SearchButton />
                             </div>
-                            <div className="search-page__input-sub-container">
-                                <SearchFilterChips
-                                    location={this.props.location}
-                                    history={this.props.history}
-                                    query={this.state.userQuery}
-                                    authenticatedUser={this.props.authenticatedUser}
-                                    settingsCascade={this.props.settingsCascade}
-                                />
-                            </div>
+							<div className="query-builder__docs-link">
+								<a href="" onClick={this.toggleQueryBuilder} data-testid="test-query-builder-toggle">
+			                        {!!this.state.showQueryBuilder ? 'Hide' : 'Show'} search options
+			                    </a>
+								<br/>
+								{!!this.state.showQueryBuilder && (
+			                            <a href={`https://docs.sourcegraph.com/user/search/queries`}>View all search options in docs</a>
+								)}
+							</div>
                         </>
-                    ) : (
-                        <>
-                            <div className="search-page__input-container">
-                                <QueryInput
-                                    {...this.props}
-                                    value={this.state.userQuery}
-                                    onChange={this.onUserQueryChange}
-                                    autoFocus={'cursor-at-end'}
-                                    hasGlobalQueryBehavior={true}
-                                />
-                                <SearchButton />
-                            </div>
-                            {hasScopes ? (
-                                <>
-                                    <div className="search-page__input-sub-container">
-                                        <SearchFilterChips
-                                            location={this.props.location}
-                                            history={this.props.history}
-                                            query={this.state.userQuery}
-                                            authenticatedUser={this.props.authenticatedUser}
-                                            settingsCascade={this.props.settingsCascade}
-                                        />
-                                    </div>
-                                    <QueryBuilder
-                                        onFieldsQueryChange={this.onBuilderQueryChange}
-                                        isSourcegraphDotCom={window.context.sourcegraphDotComMode}
-                                        onToggle={this.toggleQueryBuilder}
-                                        showQueryBuilder={this.state.showQueryBuilder}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <QueryBuilder
-                                        onFieldsQueryChange={this.onBuilderQueryChange}
-                                        isSourcegraphDotCom={window.context.sourcegraphDotComMode}
-                                        onToggle={this.toggleQueryBuilder}
-                                        showQueryBuilder={this.state.showQueryBuilder}
-                                    />
-                                    <div className="search-page__input-sub-container">
-                                        <SearchFilterChips
-                                            location={this.props.location}
-                                            history={this.props.history}
-                                            query={this.state.userQuery}
-                                            authenticatedUser={this.props.authenticatedUser}
-                                            settingsCascade={this.props.settingsCascade}
-                                        />
-                                    </div>
-                                </>
-                            )}
-                        </>
-                    )}
+
                 </Form>
             </div>
         )
@@ -194,7 +144,8 @@ export class SearchPage extends React.Component<Props, State> {
         return allScopes
     }
 
-    private toggleQueryBuilder = () => {
+    private toggleQueryBuilder = (e: React.MouseEvent<HTMLAnchorElement>) => {
+		e.preventDefault()
         this.setState(({ showQueryBuilder }) => ({ showQueryBuilder: !showQueryBuilder }))
     }
 }
