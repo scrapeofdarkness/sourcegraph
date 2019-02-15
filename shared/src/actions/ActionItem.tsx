@@ -227,12 +227,9 @@ export class ActionItem extends React.PureComponent<Props, State> {
         if (!this.props.action.command) {
             return
         }
-        console.log('# action.command, args', this.props.action.command, this.props.action.commandArguments)
+        // Record action ID (but not args, which might leak sensitive data).
+        this.context.log(this.props.action.id)
 
-        // this.commandExecutions.next({
-        //     command: this.props.action.command,
-        //     arguments: this.props.action.commandArguments,
-        // })
         const url = urlForClientCommandOpen(this.props.action, this.props.location)
         if (url) {
             window.location.href = url
@@ -240,7 +237,6 @@ export class ActionItem extends React.PureComponent<Props, State> {
     }
 
     public runAction = (e: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
-        console.log('# isAltEvent', isAltEvent(e))
         const action = (isAltEvent(e) && this.props.altAction) || this.props.action
 
         if (!action.command) {
@@ -253,14 +249,11 @@ export class ActionItem extends React.PureComponent<Props, State> {
         this.context.log(action.id)
 
         if (urlForClientCommandOpen(action, this.props.location)) {
-            console.log('# A')
             if (e.currentTarget.tagName === 'A' && e.currentTarget.hasAttribute('href')) {
-                console.log('# B')
                 // Do not execute the command. The <LinkOrButton>'s default event handler will do what we want (which
                 // is to open a URL). The only case where this breaks is if both the action and alt action are "open"
                 // commands; in that case, this only ever opens the (non-alt) action.
                 if (this.props.onDidExecute) {
-                    console.log('# C')
                     // Defer calling onRun until after the URL has been opened. If we call it immediately, then in
                     // CommandList it immediately updates the (most-recent-first) ordering of the ActionItems, and
                     // the URL actually changes underneath us before the URL is opened. There is no harm to
@@ -279,7 +272,6 @@ export class ActionItem extends React.PureComponent<Props, State> {
         // Do not show focus ring on element after running action.
         e.currentTarget.blur()
 
-        console.log('# action.command, args', action.command, action.commandArguments)
         this.commandExecutions.next({
             command: action.command,
             arguments: action.commandArguments,
