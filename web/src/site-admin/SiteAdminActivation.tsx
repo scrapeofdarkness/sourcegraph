@@ -25,10 +25,18 @@ export interface SiteAdminChecklistInfo {
 
 interface ActivateConfettiState {
     fetchedTriggers: SiteAdminChecklistInfo | null
+
+    // NEXT: rework logic from here...
+    activated: boolean
 }
 
 interface ActivateConfettiProps {
     triggers: Partial<SiteAdminChecklistInfo>
+    // clickTarget: React.RefObject<HTMLElement>
+    click: {
+        // activate on click...
+        retrigger: () => void
+    }
 }
 
 export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps, ActivateConfettiState> {
@@ -74,14 +82,23 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
         return true
     }
 
-    public render(): JSX.Element | null {
-        // if (this.props.children) {
-        //     this.props.children.
+    private clicked = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        // if (!this.state.activated) {
+        //     e.preventDefault()
+        //     refreshUserActivation.next({ didSearch: true })
+        //     this.setState({ activated: true })
+        //     setTimeout(() => {
+        //         if (this.button.current) {
+        //             this.button.current.click()
+        //         }
+        //     }, 1000)
         // }
+    }
 
+    public render(): JSX.Element | null {
         const activated = this.isActivated()
         return (
-            <div>
+            <div onClick={this.clicked}>
                 {activated !== undefined && (
                     <Confetti
                         active={activated}
