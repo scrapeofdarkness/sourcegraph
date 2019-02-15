@@ -17,7 +17,6 @@ import { queryGraphQL } from '../backend/graphql'
 export interface SiteAdminChecklistInfo {
     connectedCodeHost: boolean
     enabledRepository: boolean
-    enabledExtension: boolean
     enabledSignOn: boolean
     didSearch: boolean
     didCodeIntelligence: boolean
@@ -167,14 +166,10 @@ const partialSiteAdminChecklist: Observable<Partial<SiteAdminChecklistInfo>> = r
             `).pipe(
                 map(dataOrThrowErrors),
                 map(data => {
-                    const settings = JSON.parse(data.viewerSettings.final)
                     const authProviders = window.context.authProviders
                     return {
                         connectedCodeHost: data.externalServices.totalCount > 0,
                         enabledRepository: data.repositories.totalCount !== null && data.repositories.totalCount > 0,
-                        enabledExtension:
-                            settings.extensions &&
-                            Object.values(settings.extensions).filter(enabled => enabled).length > 0,
                         enabledSignOn: !!(authProviders && authProviders.filter(p => !p.isBuiltin).length > 0),
                         didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
                         didCodeIntelligence:
@@ -197,7 +192,6 @@ export const siteAdminChecklist: Observable<SiteAdminChecklistInfo> = partialSit
         const cl = {
             connectedCodeHost: false,
             enabledRepository: false,
-            enabledExtension: false,
             enabledSignOn: false,
             didSearch: false,
             didCodeIntelligence: false,
@@ -264,7 +258,6 @@ export class SiteAdminActivationPopoverButton extends React.PureComponent<
             checklistInfo: {
                 connectedCodeHost: false,
                 enabledRepository: false,
-                enabledExtension: false,
                 enabledSignOn: false,
                 didSearch: false,
                 didCodeIntelligence: false,
@@ -286,7 +279,6 @@ export class SiteAdminActivationPopoverButton extends React.PureComponent<
     }
 
     public render(): JSX.Element | null {
-        // MARK
         const percentage = this.state.checklistInfo ? percentageDone(this.state.checklistInfo) : 0
         return (
             <div>
@@ -393,7 +385,7 @@ export class SiteAdminChecklist extends React.PureComponent<SiteAdminChecklistPr
                         <li>
                             <ChecklistItem
                                 title="Find references"
-                                done={this.props.checklistInfo.enabledRepository}
+                                done={this.props.checklistInfo.didCodeIntelligence}
                                 action={this.findReferences}
                                 detail="To find references of a token, navigate to a code file in one of your repositories, hover over a token to activate the tooltip, and then click &ldquo;Find references&rdquo;."
                             />
