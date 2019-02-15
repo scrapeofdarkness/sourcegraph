@@ -6,6 +6,7 @@ import RocketIcon from 'mdi-react/RocketIcon'
 import CircularProgressbar from 'react-circular-progressbar'
 
 import * as React from 'react'
+import Confetti from 'react-dom-confetti'
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs'
 import { map, pairwise, startWith, switchMap } from 'rxjs/operators'
 import { Props as CommandListProps } from '../../../shared/src/commandPalette/CommandList'
@@ -20,6 +21,88 @@ export interface SiteAdminChecklistInfo {
     enabledSignOn: boolean
     didSearch: boolean
     didCodeIntelligence: boolean
+}
+
+interface ActivateConfettiState {
+    fetchedTriggers: SiteAdminChecklistInfo | null
+}
+
+interface ActivateConfettiProps {
+    triggers: Partial<SiteAdminChecklistInfo>
+}
+
+export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps, ActivateConfettiState> {
+    private subscriptions = new Subscription()
+
+    constructor(props: ActivateConfettiProps) {
+        super(props)
+        this.state = { fetchedTriggers: null }
+    }
+
+    public componentDidMount(): void {
+        // layering: {} -> remote-fetched (subset of props) -> props
+        // equivalent: {} -> props -> 'or' with remote-fetched
+        // ---------------------------
+        // // TEST CODE
+        // this.setState({ activated: false })
+        // setTimeout(() => {
+        //     this.setState({ activated: true })
+        // }, 2000)
+
+        this.subscriptions.add(siteAdminChecklist.subscribe(fetchedTriggers => this.setState({ fetchedTriggers })))
+    }
+
+    private isActivated(): boolean | undefined {
+        if (this.state.fetchedTriggers === null) {
+            return undefined
+        }
+        const triggers: { [key: string]: boolean } = {}
+        Object.assign(triggers, this.props)
+        if (this.state.fetchedTriggers) {
+            const fetchedTriggers: { [key: string]: boolean } = {}
+            Object.assign(fetchedTriggers, this.state.fetchedTriggers)
+            for (const k of Object.keys(triggers)) {
+                triggers[k] = triggers[k] || fetchedTriggers[k]
+            }
+        }
+
+        for (const v of Object.values(triggers)) {
+            if (!v) {
+                return false
+            }
+        }
+        return true
+    }
+
+    public render(): JSX.Element | null {
+        // if (this.props.children) {
+        //     this.props.children.
+        // }
+
+        const activated = this.isActivated()
+        return (
+            <div>
+                {activated !== undefined && (
+                    <Confetti
+                        active={activated}
+                        config={{
+                            angle: 180,
+                            spread: 45,
+                            startVelocity: 45,
+                            elementCount: 50,
+                            dragFriction: 0.1,
+                            duration: 3000,
+                            delay: 0,
+                            width: '10px',
+                            height: '10px',
+                            colors: ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a'],
+                        }}
+                    />
+                )}
+                {this.props.children}
+            </div>
+        )
+    }
 }
 
 /**
@@ -186,6 +269,7 @@ export class SiteAdminActivationPopoverButton extends React.PureComponent<
     }
 
     public render(): JSX.Element | null {
+        // MARK
         const percentage = this.state.checklistInfo ? percentageDone(this.state.checklistInfo) : 0
         return (
             <div>
