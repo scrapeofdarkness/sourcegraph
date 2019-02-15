@@ -6,8 +6,8 @@ import RocketIcon from 'mdi-react/RocketIcon'
 import CircularProgressbar from 'react-circular-progressbar'
 
 import * as React from 'react'
-import { Observable, Subject, Subscription } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs'
+import { map, pairwise, startWith, switchMap } from 'rxjs/operators'
 import { Props as CommandListProps } from '../../../shared/src/commandPalette/CommandList'
 import { PopoverButton } from '../../../shared/src/components/PopoverButton'
 import { dataAndErrors, dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
@@ -33,49 +33,79 @@ export const percentageDone = (info?: SiteAdminChecklistInfo): number => {
     return (100 * vals.filter(e => e).length) / vals.length
 }
 
-export const refreshUserActivation = new Subject<null>()
+/**
+ * Clients use this to trigger an update of the activation state. If the next value is null,
+ * the activation value will be synced from the server. If the next value is non-null, it will
+ * be forwarded as-is.
+ */
+export const refreshUserActivation = new BehaviorSubject<Partial<SiteAdminChecklistInfo> | null>(null)
+
+/** The latest value either fetched or triggered */
+const partialSiteAdminChecklist: Observable<Partial<SiteAdminChecklistInfo>> = refreshUserActivation.pipe(
+    switchMap(v => {
+        if (v) {
+            return of<Partial<SiteAdminChecklistInfo>>(v)
+        } else {
+            return queryGraphQL(gql`
+                query {
+                    externalServices {
+                        totalCount
+                    }
+                    repositories(enabled: true) {
+                        totalCount
+                    }
+                    viewerSettings {
+                        final
+                    }
+                    currentUser {
+                        usageStatistics {
+                            searchQueries
+                            codeIntelligenceActions
+                        }
+                    }
+                }
+            `).pipe(
+                map(dataOrThrowErrors),
+                map(data => {
+                    const settings = JSON.parse(data.viewerSettings.final)
+                    const authProviders = window.context.authProviders
+                    return {
+                        connectedCodeHost: data.externalServices.totalCount > 0,
+                        enabledRepository: data.repositories.totalCount !== null && data.repositories.totalCount > 0,
+                        enabledExtension:
+                            settings.extensions &&
+                            Object.values(settings.extensions).filter(enabled => enabled).length > 0,
+                        enabledSignOn: !!(authProviders && authProviders.filter(p => !p.isBuiltin).length > 0),
+                        didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
+                        didCodeIntelligence:
+                            !!data.currentUser && data.currentUser.usageStatistics.codeIntelligenceActions > 0,
+                    }
+                })
+            )
+        }
+    })
+)
 
 /**
  * The up-to-date site admin checklist
  */
-export const siteAdminChecklist: Observable<SiteAdminChecklistInfo> = refreshUserActivation.pipe(
-    switchMap(() =>
-        queryGraphQL(gql`
-            query {
-                externalServices {
-                    totalCount
-                }
-                repositories(enabled: true) {
-                    totalCount
-                }
-                viewerSettings {
-                    final
-                }
-                currentUser {
-                    usageStatistics {
-                        searchQueries
-                        codeIntelligenceActions
-                    }
-                }
-            }
-        `).pipe(
-            map(dataOrThrowErrors),
-            map(data => {
-                const settings = JSON.parse(data.viewerSettings.final)
-                const authProviders = window.context.authProviders
-                return {
-                    connectedCodeHost: data.externalServices.totalCount > 0,
-                    enabledRepository: data.repositories.totalCount !== null && data.repositories.totalCount > 0,
-                    enabledExtension:
-                        settings.extensions && Object.values(settings.extensions).filter(enabled => enabled).length > 0,
-                    enabledSignOn: !!(authProviders && authProviders.filter(p => !p.isBuiltin).length > 0),
-                    didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
-                    didCodeIntelligence:
-                        !!data.currentUser && data.currentUser.usageStatistics.codeIntelligenceActions > 0,
-                }
-            })
-        )
-    )
+export const siteAdminChecklist: Observable<SiteAdminChecklistInfo> = partialSiteAdminChecklist.pipe(
+    startWith({}),
+    pairwise<Partial<SiteAdminChecklistInfo>>(),
+    map(pair => {
+        // Because we are receiving partials, merge in with previous vals
+        const cl = {
+            connectedCodeHost: false,
+            enabledRepository: false,
+            enabledExtension: false,
+            enabledSignOn: false,
+            didSearch: false,
+            didCodeIntelligence: false,
+        }
+        Object.assign(cl, pair[0])
+        Object.assign(cl, pair[1])
+        return cl
+    })
 )
 
 export const fetchReferencesLink: () => Observable<string | null> = () =>
@@ -158,20 +188,22 @@ export class SiteAdminActivationPopoverButton extends React.PureComponent<
     public render(): JSX.Element | null {
         const percentage = this.state.checklistInfo ? percentageDone(this.state.checklistInfo) : 0
         return (
-            <PopoverButton
-                className="onboarding-button"
-                {...this.state}
-                popoverClassName="rounded"
-                placement="auto-end"
-                hideOnChange={true}
-                hideCaret={true}
-                popoverElement={<SiteAdminActivationPopoverDropdown history={this.props.history} {...this.state} />}
-            >
-                <span className="link-like">Setup</span>
-                <div className="progress-bar-container">
-                    <CircularProgressbar strokeWidth={12} percentage={percentage} />
-                </div>
-            </PopoverButton>
+            <div>
+                <PopoverButton
+                    className="onboarding-button"
+                    {...this.state}
+                    popoverClassName="rounded"
+                    placement="auto-end"
+                    hideOnChange={true}
+                    hideCaret={true}
+                    popoverElement={<SiteAdminActivationPopoverDropdown history={this.props.history} {...this.state} />}
+                >
+                    <span className="link-like">Setup</span>
+                    <div className="progress-bar-container">
+                        <CircularProgressbar strokeWidth={12} percentage={percentage} />
+                    </div>
+                </PopoverButton>
+            </div>
         )
     }
 }

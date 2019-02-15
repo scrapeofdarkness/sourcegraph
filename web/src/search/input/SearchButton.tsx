@@ -2,7 +2,10 @@ import ExternalLinkIcon from 'mdi-react/ExternalLinkIcon'
 import HelpCircleOutlineIcon from 'mdi-react/HelpCircleOutlineIcon'
 import SearchIcon from 'mdi-react/SearchIcon'
 import * as React from 'react'
+import Confetti from 'react-dom-confetti'
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
+import { Subscription } from 'rxjs'
+import { refreshUserActivation, siteAdminChecklist } from '../../site-admin/SiteAdminActivation'
 
 interface Props {
     /** Hide the "help" icon and dropdown. */
@@ -14,6 +17,8 @@ interface Props {
 
 interface State {
     isOpen: boolean
+
+    activated?: boolean
 }
 
 /**
@@ -22,12 +27,65 @@ interface State {
 export class SearchButton extends React.Component<Props, State> {
     public state: State = { isOpen: false }
 
+    private button: React.RefObject<HTMLButtonElement>
+    private subscriptions = new Subscription()
+
+    constructor(props: Props) {
+        super(props)
+        this.button = React.createRef()
+    }
+
+    public componentDidMount(): void {
+        this.subscriptions.add()
+        siteAdminChecklist.subscribe(checklist => {
+            if (this.state.activated === undefined) {
+                this.setState({ activated: checklist.didSearch })
+            }
+        })
+    }
+
+    public componentWillUnmount(): void {
+        this.subscriptions.unsubscribe()
+    }
+
+    private clicked = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        if (!this.state.activated) {
+            e.preventDefault()
+            refreshUserActivation.next({ didSearch: true })
+            this.setState({ activated: true })
+            setTimeout(() => {
+                if (this.button.current) {
+                    this.button.current.click()
+                }
+            }, 1000)
+        }
+    }
+
     public render(): JSX.Element | null {
         const docsURLPrefix = window.context.sourcegraphDotComMode ? 'https://docs.sourcegraph.com' : '/help'
-
         return (
             <div className="search-button d-flex">
-                <button className="btn btn-primary search-button__btn" type="submit">
+                <Confetti
+                    active={this.state.activated === undefined ? true : this.state.activated}
+                    config={{
+                        angle: 180,
+                        spread: 45,
+                        startVelocity: 45,
+                        elementCount: 50,
+                        dragFriction: 0.1,
+                        duration: 3000,
+                        delay: 0,
+                        width: '10px',
+                        height: '10px',
+                        colors: ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a'],
+                    }}
+                />
+                <button
+                    className="btn btn-primary search-button__btn"
+                    type="submit"
+                    onClick={this.clicked}
+                    ref={this.button}
+                >
                     <SearchIcon className="icon-inline" />
                     {!this.props.noLabel && <span className="search-button__label">Search</span>}
                 </button>
