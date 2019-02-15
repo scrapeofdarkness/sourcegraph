@@ -14,6 +14,12 @@ import { PopoverButton } from '../../../shared/src/components/PopoverButton'
 import { dataAndErrors, dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
 import { queryGraphQL } from '../backend/graphql'
 
+// New shim ==================================================================
+
+export const globalActivation = {} // NEXT
+
+// Old stuff ==================================================================
+
 export interface SiteAdminChecklistInfo {
     connectedCodeHost: boolean
     enabledRepository: boolean
