@@ -25,16 +25,13 @@ export interface SiteAdminChecklistInfo {
 
 interface ActivateConfettiState {
     fetchedTriggers: SiteAdminChecklistInfo | null
-
-    // NEXT: rework logic from here...
-    activated: boolean
+    activated?: boolean
 }
 
 interface ActivateConfettiProps {
-    triggers: Partial<SiteAdminChecklistInfo>
-    // clickTarget: React.RefObject<HTMLElement>
     click: {
         // activate on click...
+        update: Partial<SiteAdminChecklistInfo> // the update to be applied
         retrigger: () => void
     }
 }
@@ -48,60 +45,59 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
     }
 
     public componentDidMount(): void {
-        // layering: {} -> remote-fetched (subset of props) -> props
-        // equivalent: {} -> props -> 'or' with remote-fetched
-        // ---------------------------
-        // // TEST CODE
-        // this.setState({ activated: false })
-        // setTimeout(() => {
-        //     this.setState({ activated: true })
-        // }, 2000)
+        this.subscriptions.add(
+            siteAdminChecklist.subscribe(fetchedTriggers => {
+                let activated = true
+                const update: { [key: string]: boolean } = {}
+                Object.assign(update, this.props.click.update)
+                const ft: { [key: string]: boolean } = {}
+                Object.assign(ft, this.state.fetchedTriggers)
+                for (const k of Object.keys(update)) {
+                    if (!ft[k]) {
+                        activated = false
+                        break
+                    }
+                }
 
-        this.subscriptions.add(siteAdminChecklist.subscribe(fetchedTriggers => this.setState({ fetchedTriggers })))
+                this.setState({ fetchedTriggers, activated })
+            })
+        )
     }
 
-    private isActivated(): boolean | undefined {
+    private clicked = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (this.state.fetchedTriggers === null) {
-            return undefined
+            return
         }
-        const triggers: { [key: string]: boolean } = {}
-        Object.assign(triggers, this.props)
-        if (this.state.fetchedTriggers) {
-            const fetchedTriggers: { [key: string]: boolean } = {}
-            Object.assign(fetchedTriggers, this.state.fetchedTriggers)
-            for (const k of Object.keys(triggers)) {
-                triggers[k] = triggers[k] || fetchedTriggers[k]
-            }
+        if (this.state.activated) {
+            return
         }
 
-        for (const v of Object.values(triggers)) {
-            if (!v) {
-                return false
+        const update: { [key: string]: boolean } = {}
+        Object.assign(update, this.props.click.update)
+        const fetchedTriggers: { [key: string]: boolean } = {}
+        Object.assign(fetchedTriggers, this.state.fetchedTriggers)
+        // If the update changes the state, then set activated to true
+        for (const k of Object.keys(update)) {
+            if (!fetchedTriggers[k] && update[k]) {
+                // Activate (not activated before)
+                e.preventDefault()
+                refreshUserActivation.next(this.props.click.update)
+                this.setState({ activated: true })
+                setTimeout(() => {
+                    this.props.click.retrigger()
+                }, 1000)
+                return
             }
         }
-        return true
-    }
-
-    private clicked = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        // if (!this.state.activated) {
-        //     e.preventDefault()
-        //     refreshUserActivation.next({ didSearch: true })
-        //     this.setState({ activated: true })
-        //     setTimeout(() => {
-        //         if (this.button.current) {
-        //             this.button.current.click()
-        //         }
-        //     }, 1000)
-        // }
     }
 
     public render(): JSX.Element | null {
-        const activated = this.isActivated()
+        console.log('# this.state.activated', this.state.activated)
         return (
             <div onClick={this.clicked}>
-                {activated !== undefined && (
+                {this.state.activated !== undefined && (
                     <Confetti
-                        active={activated}
+                        active={this.state.activated}
                         config={{
                             angle: 180,
                             spread: 45,

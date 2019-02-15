@@ -2,10 +2,8 @@ import ExternalLinkIcon from 'mdi-react/ExternalLinkIcon'
 import HelpCircleOutlineIcon from 'mdi-react/HelpCircleOutlineIcon'
 import SearchIcon from 'mdi-react/SearchIcon'
 import * as React from 'react'
-import Confetti from 'react-dom-confetti'
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
-import { Subscription } from 'rxjs'
-import { ActivateConfetti, refreshUserActivation, siteAdminChecklist } from '../../site-admin/SiteAdminActivation'
+import { ActivateConfetti } from '../../site-admin/SiteAdminActivation'
 
 interface Props {
     /** Hide the "help" icon and dropdown. */
@@ -28,55 +26,25 @@ export class SearchButton extends React.Component<Props, State> {
     public state: State = { isOpen: false, didClick: false }
 
     private button: React.RefObject<HTMLButtonElement>
-    private subscriptions = new Subscription()
 
     constructor(props: Props) {
         super(props)
         this.button = React.createRef()
     }
 
-    public componentDidMount(): void {
-        // this.subscriptions.add(
-        //     siteAdminChecklist.subscribe(checklist => {
-        //         if (this.state.activated === undefined) {
-        //             this.setState({ activated: checklist.didSearch })
-        //         }
-        //     })
-        // )
-    }
-
-    public componentWillUnmount(): void {
-        this.subscriptions.unsubscribe()
-    }
-
-    // private clicked = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    //     if (!this.state.activated) {
-    //         e.preventDefault()
-    //         refreshUserActivation.next({ didSearch: true })
-    //         this.setState({ activated: true })
-    //         setTimeout(() => {
-    //             if (this.button.current) {
-    //                 this.button.current.click()
-    //             }
-    //         }, 1000)
-    //     }
-    // }
-
-    private clicked = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        this.setState({ didClick: true })
-    }
+    private retrigger = () => this.button.current && this.button.current.click()
 
     public render(): JSX.Element | null {
         const docsURLPrefix = window.context.sourcegraphDotComMode ? 'https://docs.sourcegraph.com' : '/help'
         return (
             <div className="search-button d-flex">
-                <ActivateConfetti triggers={{ didSearch: this.state.didClick }}>
-                    <button
-                        className="btn btn-primary search-button__btn"
-                        type="submit"
-                        ref={this.button}
-                        onClick={this.clicked}
-                    >
+                <ActivateConfetti
+                    click={{
+                        update: { didSearch: true },
+                        retrigger: this.retrigger,
+                    }}
+                >
+                    <button className="btn btn-primary search-button__btn" type="submit" ref={this.button}>
                         <SearchIcon className="icon-inline" />
                         {!this.props.noLabel && <span className="search-button__label">Search</span>}
                     </button>
