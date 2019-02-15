@@ -32,7 +32,7 @@ interface ActivateConfettiProps {
     click: {
         // activate on click...
         update: Partial<SiteAdminChecklistInfo> // the update to be applied
-        retrigger: () => void
+        pauseAndRetrigger?: () => void
     }
 }
 
@@ -64,6 +64,10 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
         )
     }
 
+    public componentWillUnmount(): void {
+        this.subscriptions.unsubscribe()
+    }
+
     private clicked = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (this.state.fetchedTriggers === null) {
             return
@@ -80,19 +84,19 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
         for (const k of Object.keys(update)) {
             if (!fetchedTriggers[k] && update[k]) {
                 // Activate (not activated before)
-                e.preventDefault()
                 refreshUserActivation.next(this.props.click.update)
                 this.setState({ activated: true })
-                setTimeout(() => {
-                    this.props.click.retrigger()
-                }, 1000)
+                if (this.props.click.pauseAndRetrigger) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setTimeout(this.props.click.pauseAndRetrigger, 1000)
+                }
                 return
             }
         }
     }
 
     public render(): JSX.Element | null {
-        console.log('# this.state.activated', this.state.activated)
         return (
             <div onClick={this.clicked}>
                 {this.state.activated !== undefined && (

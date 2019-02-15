@@ -3,6 +3,7 @@ import H from 'history'
 import * as React from 'react'
 import { from, Subject, Subscription } from 'rxjs'
 import { catchError, map, mapTo, mergeMap, startWith, tap } from 'rxjs/operators'
+import { ActivateConfetti } from '../../../web/src/site-admin/SiteAdminActivation' // TODO(beyang): invalid import
 import { ExecuteCommandParams } from '../api/client/services/command'
 import { ActionContribution } from '../api/protocol'
 import { urlForOpenPanel } from '../commands/commands'
@@ -82,6 +83,12 @@ export class ActionItem extends React.PureComponent<Props, State> {
 
     private commandExecutions = new Subject<ExecuteCommandParams>()
     private subscriptions = new Subscription()
+    private linkOrButton: React.RefObject<LinkOrButton>
+
+    constructor(props: Props) {
+        super(props)
+        this.linkOrButton = React.createRef()
+    }
 
     public componentDidMount(): void {
         this.subscriptions.add(
@@ -195,20 +202,45 @@ export class ActionItem extends React.PureComponent<Props, State> {
                     (this.props.altAction && urlForClientCommandOpen(this.props.altAction, this.props.location))
                 }
                 onSelect={this.runAction}
+                ref={this.linkOrButton}
             >
-                {/* Use custom CSS classes instead of Bootstrap CSS classes because this component is also
+                <ActivateConfetti
+                    click={{
+                        update: { didCodeIntelligence: true },
+                        pauseAndRetrigger: this.retrigger,
+                    }}
+                >
+                    {/* Use custom CSS classes instead of Bootstrap CSS classes because this component is also
                  used in the browser extension, which doesn't necessarily have Bootstrap CSS classes defined. */}
-                <div className="action-item__content">{content}</div>
-                {showLoadingSpinner && (
-                    <div className="action-item__loader">
-                        <LoadingSpinner className="icon-inline" />
-                    </div>
-                )}
+                    <div className="action-item__content">{content}</div>
+                    {showLoadingSpinner && (
+                        <div className="action-item__loader">
+                            <LoadingSpinner className="icon-inline" />
+                        </div>
+                    )}
+                </ActivateConfetti>
             </LinkOrButton>
         )
     }
 
+    private retrigger = () => {
+        if (!this.props.action.command) {
+            return
+        }
+        console.log('# action.command, args', this.props.action.command, this.props.action.commandArguments)
+
+        // this.commandExecutions.next({
+        //     command: this.props.action.command,
+        //     arguments: this.props.action.commandArguments,
+        // })
+        const url = urlForClientCommandOpen(this.props.action, this.props.location)
+        if (url) {
+            window.location.href = url
+        }
+    }
+
     public runAction = (e: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
+        console.log('# isAltEvent', isAltEvent(e))
         const action = (isAltEvent(e) && this.props.altAction) || this.props.action
 
         if (!action.command) {
@@ -221,11 +253,14 @@ export class ActionItem extends React.PureComponent<Props, State> {
         this.context.log(action.id)
 
         if (urlForClientCommandOpen(action, this.props.location)) {
+            console.log('# A')
             if (e.currentTarget.tagName === 'A' && e.currentTarget.hasAttribute('href')) {
+                console.log('# B')
                 // Do not execute the command. The <LinkOrButton>'s default event handler will do what we want (which
                 // is to open a URL). The only case where this breaks is if both the action and alt action are "open"
                 // commands; in that case, this only ever opens the (non-alt) action.
                 if (this.props.onDidExecute) {
+                    console.log('# C')
                     // Defer calling onRun until after the URL has been opened. If we call it immediately, then in
                     // CommandList it immediately updates the (most-recent-first) ordering of the ActionItems, and
                     // the URL actually changes underneath us before the URL is opened. There is no harm to
@@ -244,6 +279,7 @@ export class ActionItem extends React.PureComponent<Props, State> {
         // Do not show focus ring on element after running action.
         e.currentTarget.blur()
 
+        console.log('# action.command, args', action.command, action.commandArguments)
         this.commandExecutions.next({
             command: action.command,
             arguments: action.commandArguments,
