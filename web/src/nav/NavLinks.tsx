@@ -66,6 +66,7 @@ export class NavLinks extends React.PureComponent<Props> {
                     platformContext={this.props.platformContext}
                     location={this.props.location}
                 />
+                {/*
                 {this.props.authenticatedUser && this.props.authenticatedUser.siteAdmin && (
                     <SiteAdminActivationPopoverButton
                         menu={ContributableMenu.CommandPalette}
@@ -75,6 +76,7 @@ export class NavLinks extends React.PureComponent<Props> {
                         extensionsController={this.props.extensionsController}
                     />
                 )}
+                */}
                 {(!this.props.showDotComMarketing ||
                     !!this.props.authenticatedUser ||
                     this.props.location.pathname !== '/welcome') && (
