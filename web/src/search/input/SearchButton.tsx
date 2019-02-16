@@ -45,7 +45,7 @@ export class SearchButton extends React.Component<Props, State> {
                     activationKeys={['didSearch']}
                     pauseAndRetrigger={this.retrigger}
                 >
-                    <button className="btn btn-primary search-button__btn" type="submit" ref={this.button}>
+                    <button className="btn btn-primary search-button__btn first-use-button animate" type="submit" ref={this.button}>
                         <SearchIcon className="icon-inline" />
                         {!this.props.noLabel && <span className="search-button__label">Search</span>}
                     </button>

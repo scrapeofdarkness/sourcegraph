@@ -98,6 +98,10 @@
 
 /************************************************************/
 
+.first-use-button {
+	display: block;
+	position: relative;
+}
 .first-use-button:before,
 .first-use-button:after {
     position: absolute;
@@ -156,10 +160,18 @@
 .first-use-button.animate:before {
     display: block;
     animation: topBubbles ease-in-out 0.75s forwards;
+
+	// Remove 2 lines elow
+	animation-iteration-count: infinite;
+	animation-delay: 1000ms;
 }
 .first-use-button.animate:after {
     display: block;
     animation: bottomBubbles ease-in-out 0.75s forwards;
+
+	// Remove 2 lines Below
+	animation-iteration-count: infinite;
+	animation-delay: 1000ms;
 }
 
 @keyframes topBubbles {
