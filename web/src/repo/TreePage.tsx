@@ -38,6 +38,7 @@ import { basename } from '../util/path'
 import { fetchTree } from './backend'
 import { GitCommitNode, GitCommitNodeProps } from './commits/GitCommitNode'
 import { gitCommitFragment } from './commits/RepositoryCommitsPage'
+import { ActivationStatus } from '../../../shared/src/components/Activation'
 
 const TreeEntry: React.FunctionComponent<{
     isDir: boolean
@@ -128,6 +129,7 @@ interface Props extends SettingsCascadeProps, ExtensionsControllerProps, Platfor
     commitID: string
     rev: string
     isLightTheme: boolean
+    activation: ActivationStatus
 
     location: H.Location
     history: H.History
@@ -281,7 +283,7 @@ export class TreePage extends React.PureComponent<Props, State> {
                                         history={this.props.history}
                                         placeholder=""
                                     />
-                                    <SearchButton />
+                                    <SearchButton activation={this.props.activation} />
                                 </Form>
                             </section>
                             <TreeEntriesSection

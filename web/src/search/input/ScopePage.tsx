@@ -19,6 +19,7 @@ import { submitSearch } from '../helpers'
 import { queryUpdates } from './QueryInput'
 import { QueryInput } from './QueryInput'
 import { SearchButton } from './SearchButton'
+import { ActivationStatus } from '../../../../shared/src/components/Activation'
 
 const ScopeNotFound = () => (
     <HeroPage
@@ -36,6 +37,7 @@ const ScopeNotFound = () => (
 
 interface ScopePageProps extends RouteComponentProps<{ id: GQL.ID }>, SettingsCascadeProps {
     authenticatedUser: GQL.IUser | null
+    activation: ActivationStatus
 }
 
 interface State {
@@ -166,7 +168,7 @@ export class ScopePage extends React.Component<ScopePageProps, State> {
                                 history={this.props.history}
                                 placeholder="Search in this scope..."
                             />
-                            <SearchButton />
+                            <SearchButton activation={this.props.activation} />
                         </Form>
                     </section>
                     <PageTitle title={this.state.name} />

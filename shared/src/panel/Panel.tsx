@@ -7,6 +7,7 @@ import { PanelViewWithComponent, ViewProviderRegistrationOptions } from '../../.
 import { ContributableMenu, ContributableViewContainer } from '../../../shared/src/api/protocol/contribution'
 import { ExtensionsControllerProps } from '../../../shared/src/extensions/controller'
 import { ActionsNavItems } from '../actions/ActionsNavItems'
+import { ActivationStatus } from '../components/Activation'
 import { FetchFileCtx } from '../components/CodeExcerpt'
 import { Resizable } from '../components/Resizable'
 import { Spacer, Tab, TabsWithURLViewStatePersistence } from '../components/Tabs'
@@ -67,6 +68,8 @@ export class Panel extends React.PureComponent<Props, State> {
     }
 
     public render(): JSX.Element | null {
+        // console.log('# Panel', this.props.activation)
+
         const items = this.state.panelViews
             ? this.state.panelViews
                   .map(

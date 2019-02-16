@@ -1,6 +1,7 @@
 import * as H from 'history'
 import * as React from 'react'
 import { parseSearchURLQuery } from '..'
+import { ActivationStatus } from '../../../../shared/src/components/Activation'
 import * as GQL from '../../../../shared/src/graphql/schema'
 import { SettingsCascadeProps } from '../../../../shared/src/settings/settings'
 import { Form } from '../../components/Form'
@@ -17,6 +18,7 @@ interface Props extends SettingsCascadeProps {
     location: H.Location
     history: H.History
     isLightTheme: boolean
+    activation: ActivationStatus
     onThemeChange: () => void
 }
 
@@ -72,7 +74,7 @@ export class SearchPage extends React.Component<Props, State> {
                             autoFocus={'cursor-at-end'}
                             hasGlobalQueryBehavior={true}
                         />
-                        <SearchButton />
+                        <SearchButton activation={this.props.activation} />
                     </div>
                     <div className="search-page__input-sub-container">
                         <SearchFilterChips

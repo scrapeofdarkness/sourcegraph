@@ -5,6 +5,7 @@ import { Route } from 'react-router'
 import { BrowserRouter } from 'react-router-dom'
 import { combineLatest, from, Subscription } from 'rxjs'
 import { startWith } from 'rxjs/operators'
+import { ActivationStatus } from '../../shared/src/components/Activation'
 import { setLinkComponent } from '../../shared/src/components/Link'
 import {
     createController as createExtensionsController,
@@ -34,6 +35,7 @@ import { createPlatformContext } from './platform/context'
 import { RepoHeaderActionButton } from './repo/RepoHeader'
 import { RepoRevContainerRoute } from './repo/RepoRevContainer'
 import { LayoutRouteProps } from './routes'
+import { newActivationStatus } from './site-admin/SiteAdminActivation'
 import { SiteAdminAreaRoute } from './site-admin/SiteAdminArea'
 import { SiteAdminSideBarGroups } from './site-admin/SiteAdminSidebar'
 import { eventLogger } from './tracking/eventLogger'
@@ -77,6 +79,11 @@ interface SourcegraphWebAppState extends PlatformContextProps, SettingsCascadePr
      * The current search query in the navbar.
      */
     navbarSearchQuery: string
+
+    /**
+     * The user activation status
+     */
+    activation: ActivationStatus
 }
 
 const LIGHT_THEME_LOCAL_STORAGE_KEY = 'light-theme'
@@ -103,6 +110,7 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
             extensionsController: createExtensionsController(platformContext),
             settingsCascade: EMPTY_SETTINGS_CASCADE,
             viewerSubject: SITE_SUBJECT_NO_ADMIN,
+            activation: newActivationStatus(),
         }
     }
 
@@ -216,6 +224,7 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
                                         // Extensions
                                         platformContext={this.state.platformContext}
                                         extensionsController={this.state.extensionsController}
+                                        activation={this.state.activation}
                                     />
                                 )}
                             />

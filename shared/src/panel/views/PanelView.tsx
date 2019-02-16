@@ -2,6 +2,7 @@ import H from 'history'
 import React from 'react'
 import { Observable } from 'rxjs'
 import { PanelViewWithComponent, ViewProviderRegistrationOptions } from '../../api/client/services/view'
+import { ActivationStatus } from '../../components/Activation'
 import { FetchFileCtx } from '../../components/CodeExcerpt'
 import { Markdown } from '../../components/Markdown'
 import { ExtensionsControllerProps } from '../../extensions/controller'
@@ -17,6 +18,7 @@ interface Props extends ExtensionsControllerProps, SettingsCascadeProps {
     history: H.History
     location: H.Location
     isLightTheme: boolean
+    activation: ActivationStatus
     fetchHighlightedFileLines: (ctx: FetchFileCtx, force?: boolean) => Observable<string[]>
 }
 

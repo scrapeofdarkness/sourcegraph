@@ -3,8 +3,7 @@ import HelpCircleOutlineIcon from 'mdi-react/HelpCircleOutlineIcon'
 import SearchIcon from 'mdi-react/SearchIcon'
 import * as React from 'react'
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
-import { ActivateConfetti } from '../../../../shared/src/components/Activation'
-import { globalActivation } from '../../site-admin/SiteAdminActivation'
+import { ActivateConfetti, ActivationStatus } from '../../../../shared/src/components/Activation'
 
 interface Props {
     /** Hide the "help" icon and dropdown. */
@@ -12,6 +11,8 @@ interface Props {
 
     /** Never show the "Search" button label. */
     noLabel?: boolean
+
+    activation: ActivationStatus
 }
 
 interface State {
@@ -40,7 +41,7 @@ export class SearchButton extends React.Component<Props, State> {
         return (
             <div className="search-button d-flex">
                 <ActivateConfetti
-                    activation={globalActivation}
+                    activation={this.props.activation}
                     activationKeys={['didSearch']}
                     pauseAndRetrigger={this.retrigger}
                 >

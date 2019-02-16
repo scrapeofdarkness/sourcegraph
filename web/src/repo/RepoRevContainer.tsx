@@ -5,6 +5,7 @@ import * as React from 'react'
 import { Route, RouteComponentProps, Switch } from 'react-router'
 import { defer, Subject, Subscription } from 'rxjs'
 import { catchError, delay, distinctUntilChanged, map, retryWhen, switchMap, tap } from 'rxjs/operators'
+import { ActivationStatus } from '../../../shared/src/components/Activation'
 import { ExtensionsControllerProps } from '../../../shared/src/extensions/controller'
 import * as GQL from '../../../shared/src/graphql/schema'
 import { PlatformContextProps } from '../../../shared/src/platform/context'
@@ -34,6 +35,7 @@ export interface RepoRevContainerContext
     authenticatedUser: GQL.IUser | null
     resolvedRev: ResolvedRev
     isLightTheme: boolean
+    activation: ActivationStatus
     routePrefix: string
 }
 
@@ -50,6 +52,7 @@ interface RepoRevContainerProps
     rev: string
     authenticatedUser: GQL.IUser | null
     isLightTheme: boolean
+    activation: ActivationStatus
     routePrefix: string
 
     /**
@@ -191,6 +194,7 @@ export class RepoRevContainer extends React.PureComponent<RepoRevContainerProps,
             platformContext: this.props.platformContext,
             extensionsController: this.props.extensionsController,
             isLightTheme: this.props.isLightTheme,
+            activation: this.props.activation,
             repo: this.props.repo,
             repoHeaderContributionsLifecycleProps: this.props.repoHeaderContributionsLifecycleProps,
             resolvedRev: this.props.resolvedRevOrError,
@@ -199,6 +203,9 @@ export class RepoRevContainer extends React.PureComponent<RepoRevContainerProps,
             authenticatedUser: this.props.authenticatedUser,
             settingsCascade: this.props.settingsCascade,
         }
+
+        // console.log('# this.props.activation', this.props.activation)
+        // console.log('# context.activation', context.activation)
 
         return (
             <div className="repo-rev-container">

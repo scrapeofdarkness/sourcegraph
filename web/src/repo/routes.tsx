@@ -18,6 +18,7 @@ const TreePage = React.lazy(async () => ({ default: (await import('./TreePage'))
 /** Dev feature flag to make benchmarking the file tree in isolation easier. */
 const hideRepoRevContent = localStorage.getItem('hideRepoRevContent')
 
+// MARK
 export const repoRevContainerRoutes: ReadonlyArray<RepoRevContainerRoute> = [
     ...['', '/-/:objectType(blob|tree)/:filePath+'].map(routePath => ({
         path: routePath,
@@ -96,6 +97,7 @@ export const repoRevContainerRoutes: ReadonlyArray<RepoRevContainerRoute> = [
                                     location={context.location}
                                     history={context.history}
                                     isLightTheme={context.isLightTheme}
+                                    activation={context.activation}
                                     authenticatedUser={context.authenticatedUser}
                                 />
                             ) : (

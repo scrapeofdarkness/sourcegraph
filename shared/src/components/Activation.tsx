@@ -110,11 +110,6 @@ export class SiteAdminActivationPopoverButton extends React.PureComponent<
     }
 
     public render(): JSX.Element | null {
-        console.log('# this.state.completed', this.state.completed)
-        if (this.state.completed) {
-            console.log('# pd', percentageDone(this.state.completed))
-        }
-
         return (
             <div>
                 <PopoverButton

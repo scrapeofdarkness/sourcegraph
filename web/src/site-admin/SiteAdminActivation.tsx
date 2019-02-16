@@ -19,6 +19,7 @@ import { queryGraphQL } from '../backend/graphql'
 // New shim ==================================================================
 
 const fetchActivationStatus = () =>
+    // TODO: handle non-site-admin user, non-authenticated user
     queryGraphQL(gql`
         query {
             externalServices {
@@ -51,6 +52,11 @@ const fetchActivationStatus = () =>
         })
     )
 
+export function newActivationStatus(): ActivationStatus {
+    return globalActivation
+}
+
+// TODO(beyang): remove singleton
 export const globalActivation = new ActivationStatus(
     [
         {
