@@ -12,6 +12,7 @@ import { PlatformContextProps } from '../../../shared/src/platform/context'
 import { SettingsCascadeProps } from '../../../shared/src/settings/settings'
 import { isDiscussionsEnabled } from '../discussions'
 import { KeybindingsProps } from '../keybindings'
+import { globalActivation } from '../site-admin/SiteAdminActivation'
 import { UserNavItem } from './UserNavItem'
 
 interface Props
@@ -79,6 +80,7 @@ export class NavLinks extends React.PureComponent<Props> {
                 */}
                 {this.props.authenticatedUser && this.props.authenticatedUser.siteAdmin && (
                     <SiteAdminActivationPopoverButton
+                        activation={globalActivation}
                         menu={ContributableMenu.CommandPalette}
                         history={this.props.history}
                         location={this.props.location}

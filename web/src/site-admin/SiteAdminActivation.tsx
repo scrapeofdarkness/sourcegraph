@@ -5,18 +5,91 @@ import InformationOutlineIcon from 'mdi-react/InformationOutlineIcon'
 import RocketIcon from 'mdi-react/RocketIcon'
 import CircularProgressbar from 'react-circular-progressbar'
 
+import { graphql } from 'graphql'
 import * as React from 'react'
 import Confetti from 'react-dom-confetti'
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs'
-import { map, pairwise, startWith, switchMap } from 'rxjs/operators'
+import { first, map, pairwise, startWith, switchMap } from 'rxjs/operators'
 import { Props as CommandListProps } from '../../../shared/src/commandPalette/CommandList'
+import { ActivationStatus } from '../../../shared/src/components/Activation'
 import { PopoverButton } from '../../../shared/src/components/PopoverButton'
 import { dataAndErrors, dataOrThrowErrors, gql } from '../../../shared/src/graphql/graphql'
 import { queryGraphQL } from '../backend/graphql'
 
 // New shim ==================================================================
 
-export const globalActivation = {} // NEXT
+const fetchActivationStatus = () =>
+    queryGraphQL(gql`
+        query {
+            externalServices {
+                totalCount
+            }
+            repositories(enabled: true) {
+                totalCount
+            }
+            viewerSettings {
+                final
+            }
+            currentUser {
+                usageStatistics {
+                    searchQueries
+                    codeIntelligenceActions
+                }
+            }
+        }
+    `).pipe(
+        map(dataOrThrowErrors),
+        map(data => {
+            const authProviders = window.context.authProviders
+            return {
+                connectedCodeHost: data.externalServices.totalCount > 0,
+                enabledRepository: data.repositories.totalCount !== null && data.repositories.totalCount > 0,
+                enabledSignOn: !!(authProviders && authProviders.filter(p => !p.isBuiltin).length > 0),
+                didSearch: !!data.currentUser && data.currentUser.usageStatistics.searchQueries > 0,
+                didCodeIntelligence: !!data.currentUser && data.currentUser.usageStatistics.codeIntelligenceActions > 0,
+            }
+        })
+    )
+
+export const globalActivation = new ActivationStatus(
+    [
+        {
+            id: 'connectedCodeHost',
+            title: 'Connect your code host',
+            detail: 'Configure Sourcegraph to talk to your code host and fetch a list of your repositories.',
+            action: (h: H.History) => h.push('/site-admin/external-services'),
+        },
+        {
+            id: 'enabledRepository',
+            title: 'Enable repositories',
+            detail: 'Select which repositories Sourcegraph should pull and index from your code host(s).',
+            action: (h: H.History) => h.push('/site-admin/repositories'),
+        },
+        {
+            id: 'didSearch',
+            title: 'Search your code',
+            detail: 'Issue a search query over your code.',
+            action: (h: H.History) => h.push('/search'),
+        },
+        {
+            id: 'didCodeIntelligence',
+            title: 'Find references',
+            detail:
+                'To find references of a token, navigate to a code file in one of your repositories, hover over a token to activate the tooltip, and then click &ldquo;Find references&rdquo;.',
+            action: (h: H.History) =>
+                fetchReferencesLink()
+                    .pipe(first())
+                    .subscribe(r => r && h.push(r)),
+        },
+        {
+            id: 'enabledSignOn',
+            title: 'Configure sign-on or share',
+            detail: 'Configure a single-sign on (SSO) provider or have at least one other teammate sign up.',
+            action: (h: H.History) => window.open('https://docs.sourcegraph.com/admin/auth', '_blank'),
+        },
+    ],
+    fetchActivationStatus
+)
 
 // Old stuff ==================================================================
 

@@ -204,14 +204,23 @@ export class ActionItem extends React.PureComponent<Props, State> {
                 onSelect={this.runAction}
                 ref={this.linkOrButton}
             >
+                {/* Use custom CSS classes instead of Bootstrap CSS classes because this component is also
+            used in the browser extension, which doesn't necessarily have Bootstrap CSS classes defined. */}
+                <div className="action-item__content">{content}</div>
+                {showLoadingSpinner && (
+                    <div className="action-item__loader">
+                        <LoadingSpinner className="icon-inline" />
+                    </div>
+                )}
+                {/*
                 <ActivateConfetti
                     click={{
                         update: { didCodeIntelligence: true },
                         pauseAndRetrigger: this.retrigger,
                     }}
                 >
-                    {/* Use custom CSS classes instead of Bootstrap CSS classes because this component is also
-                 used in the browser extension, which doesn't necessarily have Bootstrap CSS classes defined. */}
+                    {* Use custom CSS classes instead of Bootstrap CSS classes because this component is also
+                 used in the browser extension, which doesn't necessarily have Bootstrap CSS classes defined. *}
                     <div className="action-item__content">{content}</div>
                     {showLoadingSpinner && (
                         <div className="action-item__loader">
@@ -219,6 +228,7 @@ export class ActionItem extends React.PureComponent<Props, State> {
                         </div>
                     )}
                 </ActivateConfetti>
+                    */}
             </LinkOrButton>
         )
     }
