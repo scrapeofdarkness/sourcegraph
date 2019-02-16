@@ -1,7 +1,6 @@
 import H from 'history'
 import CheckboxBlankCircleOutlineIcon from 'mdi-react/CheckboxBlankCircleOutlineIcon'
 import CheckboxMarkedCircleOutlineIcon from 'mdi-react/CheckboxMarkedCircleOutlineIcon'
-import InformationOutlineIcon from 'mdi-react/InformationOutlineIcon'
 import RocketIcon from 'mdi-react/RocketIcon'
 import * as React from 'react'
 import CircularProgressbar from 'react-circular-progressbar'
@@ -34,6 +33,8 @@ export class ActivationStatus {
         this.steps_ = steps
         this.fetchCompleted = fetchCompleted
         this.completed_ = new BehaviorSubject<{ [key: string]: boolean } | null>(null)
+
+        console.log('# steps', steps)
     }
 
     public get steps(): ActivationStep[] {
@@ -54,14 +55,24 @@ export class ActivationStatus {
         if (!u) {
             this.fetchCompleted()
                 .pipe(first()) // subscription will get auto-cleaned up
-                .subscribe(res => this.completed.next(res))
+                .subscribe(res => {
+                    const nextCompleted: { [key: string]: boolean } = {}
+                    for (const step of this.steps) {
+                        nextCompleted[step.id] = res[step.id] || false
+                    }
+                    this.completed.next(nextCompleted)
+                })
         } else {
             if (!this.completed.value) {
                 return
             }
-            const newVal = {}
+            const newVal: { [key: string]: boolean } = {}
             Object.assign(newVal, this.completed.value)
-            Object.assign(newVal, u)
+            for (const step of this.steps) {
+                if (u[step.id] !== undefined) {
+                    newVal[step.id] = u[step.id]
+                }
+            }
             this.completed.next(newVal)
         }
     }

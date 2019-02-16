@@ -45,7 +45,7 @@ export interface RepoContainerProps
     repoHeaderActionButtons: ReadonlyArray<RepoHeaderActionButton>
     authenticatedUser: GQL.IUser | null
     isLightTheme: boolean
-    activation: ActivationStatus
+    activation?: ActivationStatus
 }
 
 interface RepoRevContainerState extends ParsedRepoRev {

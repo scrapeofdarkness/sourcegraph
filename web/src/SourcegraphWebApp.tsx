@@ -83,7 +83,7 @@ interface SourcegraphWebAppState extends PlatformContextProps, SettingsCascadePr
     /**
      * The user activation status
      */
-    activation: ActivationStatus
+    activation?: ActivationStatus
 }
 
 const LIGHT_THEME_LOCAL_STORAGE_KEY = 'light-theme'
@@ -110,7 +110,6 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
             extensionsController: createExtensionsController(platformContext),
             settingsCascade: EMPTY_SETTINGS_CASCADE,
             viewerSubject: SITE_SUBJECT_NO_ADMIN,
-            activation: newActivationStatus(),
         }
     }
 
@@ -122,8 +121,12 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
         document.body.classList.add('theme')
         this.subscriptions.add(
             authenticatedUser.subscribe(
-                authenticatedUser => this.setState({ authenticatedUser }),
-                () => this.setState({ authenticatedUser: null })
+                authenticatedUser =>
+                    this.setState({
+                        authenticatedUser,
+                        activation: authenticatedUser ? newActivationStatus(authenticatedUser.siteAdmin) : undefined,
+                    }),
+                () => this.setState({ authenticatedUser: null, activation: undefined })
             )
         )
 

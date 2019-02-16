@@ -10,7 +10,7 @@ interface Props {
     location: H.Location
     history: H.History
     navbarSearchQuery: string
-    activation: ActivationStatus
+    activation?: ActivationStatus
     onChange: (newValue: string) => void
 }
 /**

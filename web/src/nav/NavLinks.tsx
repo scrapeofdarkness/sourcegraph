@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs'
 import { ActionsNavItems } from '../../../shared/src/actions/ActionsNavItems'
 import { ContributableMenu } from '../../../shared/src/api/protocol'
 import { CommandListPopoverButton } from '../../../shared/src/commandPalette/CommandList'
-import { SiteAdminActivationPopoverButton } from '../../../shared/src/components/Activation'
+import { ActivationStatus, SiteAdminActivationPopoverButton } from '../../../shared/src/components/Activation'
 import { Link } from '../../../shared/src/components/Link'
 import { ExtensionsControllerProps } from '../../../shared/src/extensions/controller'
 import * as GQL from '../../../shared/src/graphql/schema'
@@ -12,7 +12,6 @@ import { PlatformContextProps } from '../../../shared/src/platform/context'
 import { SettingsCascadeProps } from '../../../shared/src/settings/settings'
 import { isDiscussionsEnabled } from '../discussions'
 import { KeybindingsProps } from '../keybindings'
-import { globalActivation } from '../site-admin/SiteAdminActivation'
 import { UserNavItem } from './UserNavItem'
 
 interface Props
@@ -24,6 +23,7 @@ interface Props
     history: H.History
     authenticatedUser: GQL.IUser | null
     isLightTheme: boolean
+    activation?: ActivationStatus
     onThemeChange: () => void
     showDotComMarketing: boolean
 }
@@ -67,20 +67,9 @@ export class NavLinks extends React.PureComponent<Props> {
                     platformContext={this.props.platformContext}
                     location={this.props.location}
                 />
-                {/*
-                {this.props.authenticatedUser && this.props.authenticatedUser.siteAdmin && (
+                {this.props.activation && (
                     <SiteAdminActivationPopoverButton
-                        menu={ContributableMenu.CommandPalette}
-                        history={this.props.history}
-                        location={this.props.location}
-                        platformContext={this.props.platformContext}
-                        extensionsController={this.props.extensionsController}
-                    />
-                )}
-                */}
-                {this.props.authenticatedUser && this.props.authenticatedUser.siteAdmin && (
-                    <SiteAdminActivationPopoverButton
-                        activation={globalActivation}
+                        activation={this.props.activation}
                         menu={ContributableMenu.CommandPalette}
                         history={this.props.history}
                         location={this.props.location}

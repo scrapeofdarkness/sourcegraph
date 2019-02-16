@@ -19,7 +19,7 @@ interface Props extends SettingsCascadeProps, PlatformContextProps, ExtensionsCo
     location: H.Location
     authenticatedUser: GQL.IUser | null
     isLightTheme: boolean
-    activation: ActivationStatus
+    activation?: ActivationStatus
     onThemeChange: () => void
     navbarSearchQuery: string
     onNavbarQueryChange: (query: string) => void

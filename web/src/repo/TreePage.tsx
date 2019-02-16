@@ -14,6 +14,7 @@ import { catchError, distinctUntilChanged, map, startWith, switchMap, tap } from
 import { ActionItem } from '../../../shared/src/actions/ActionItem'
 import { ActionsContainer } from '../../../shared/src/actions/ActionsContainer'
 import { ContributableMenu } from '../../../shared/src/api/protocol'
+import { ActivationStatus } from '../../../shared/src/components/Activation'
 import { RepositoryIcon } from '../../../shared/src/components/icons' // TODO: Switch to mdi icon
 import { displayRepoName } from '../../../shared/src/components/RepoFileLink'
 import { ExtensionsControllerProps } from '../../../shared/src/extensions/controller'
@@ -38,7 +39,6 @@ import { basename } from '../util/path'
 import { fetchTree } from './backend'
 import { GitCommitNode, GitCommitNodeProps } from './commits/GitCommitNode'
 import { gitCommitFragment } from './commits/RepositoryCommitsPage'
-import { ActivationStatus } from '../../../shared/src/components/Activation'
 
 const TreeEntry: React.FunctionComponent<{
     isDir: boolean
@@ -129,7 +129,7 @@ interface Props extends SettingsCascadeProps, ExtensionsControllerProps, Platfor
     commitID: string
     rev: string
     isLightTheme: boolean
-    activation: ActivationStatus
+    activation?: ActivationStatus
 
     location: H.Location
     history: H.History

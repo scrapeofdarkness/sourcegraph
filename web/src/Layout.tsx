@@ -64,7 +64,7 @@ export interface LayoutProps
     viewerSubject: Pick<GQL.ISettingsSubject, 'id' | 'viewerCanAdminister'>
 
     isLightTheme: boolean
-    activation: ActivationStatus
+    activation?: ActivationStatus
     onThemeChange: () => void
     navbarSearchQuery: string
     onNavbarQueryChange: (query: string) => void

@@ -12,7 +12,7 @@ interface Props {
     /** Never show the "Search" button label. */
     noLabel?: boolean
 
-    activation: ActivationStatus
+    activation?: ActivationStatus
 }
 
 interface State {

@@ -35,7 +35,7 @@ export interface RepoRevContainerContext
     authenticatedUser: GQL.IUser | null
     resolvedRev: ResolvedRev
     isLightTheme: boolean
-    activation: ActivationStatus
+    activation?: ActivationStatus
     routePrefix: string
 }
 
@@ -52,7 +52,7 @@ interface RepoRevContainerProps
     rev: string
     authenticatedUser: GQL.IUser | null
     isLightTheme: boolean
-    activation: ActivationStatus
+    activation?: ActivationStatus
     routePrefix: string
 
     /**
@@ -203,9 +203,6 @@ export class RepoRevContainer extends React.PureComponent<RepoRevContainerProps,
             authenticatedUser: this.props.authenticatedUser,
             settingsCascade: this.props.settingsCascade,
         }
-
-        // console.log('# this.props.activation', this.props.activation)
-        // console.log('# context.activation', context.activation)
 
         return (
             <div className="repo-rev-container">
