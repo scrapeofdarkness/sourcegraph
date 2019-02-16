@@ -247,12 +247,6 @@ interface ActivateConfettiState {
 }
 
 interface ActivateConfettiProps {
-    // click: {
-    //     // activate on click...
-    //     update: Partial<SiteAdminChecklistInfo> // the update to be applied
-    //     pauseAndRetrigger?: () => void
-    // }
-
     activation: ActivationStatus
     activationKeys: string[]
     pauseAndRetrigger?: () => void
