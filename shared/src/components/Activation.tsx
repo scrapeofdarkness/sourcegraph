@@ -33,8 +33,6 @@ export class ActivationStatus {
         this.steps_ = steps
         this.fetchCompleted = fetchCompleted
         this.completed_ = new BehaviorSubject<{ [key: string]: boolean } | null>(null)
-
-        console.log('# steps', steps)
     }
 
     public get steps(): ActivationStep[] {
@@ -322,29 +320,39 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
     }
 
     public render(): JSX.Element | null {
-        return this.props.activation ? (
-            <div onClick={this.clicked}>
-                {this.state.activated !== undefined && (
-                    <Confetti
-                        active={this.state.activated}
-                        config={{
-                            angle: 180,
-                            spread: 45,
-                            startVelocity: 45,
-                            elementCount: 50,
-                            dragFriction: 0.1,
-                            duration: 3000,
-                            delay: 0,
-                            width: '10px',
-                            height: '10px',
-                            colors: ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a'],
-                        }}
-                    />
-                )}
+        return this.props.activation !== undefined ? (
+            <div onClick={this.clicked} className={`first-use-button ${this.state.activated ? 'animated' : ''}`}>
                 {this.props.children}
             </div>
         ) : (
             <div>{this.props.children}</div>
         )
     }
+
+    // public render(): JSX.Element | null {
+    //     return this.props.activation ? (
+    //         <div onClick={this.clicked}>
+    //             {this.state.activated !== undefined && (
+    //                 <Confetti
+    //                     active={this.state.activated}
+    //                     config={{
+    //                         angle: 180,
+    //                         spread: 45,
+    //                         startVelocity: 45,
+    //                         elementCount: 50,
+    //                         dragFriction: 0.1,
+    //                         duration: 3000,
+    //                         delay: 0,
+    //                         width: '10px',
+    //                         height: '10px',
+    //                         colors: ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a'],
+    //                     }}
+    //                 />
+    //             )}
+    //             {this.props.children}
+    //         </div>
+    //     ) : (
+    //         <div>{this.props.children}</div>
+    //     )
+    // }
 }
