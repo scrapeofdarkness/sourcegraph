@@ -3,10 +3,10 @@ import H from 'history'
 import * as React from 'react'
 import { from, Subject, Subscription } from 'rxjs'
 import { catchError, map, mapTo, mergeMap, startWith, tap } from 'rxjs/operators'
-import { ActivateConfetti } from '../../../web/src/site-admin/SiteAdminActivation' // TODO(beyang): invalid import
 import { ExecuteCommandParams } from '../api/client/services/command'
 import { ActionContribution } from '../api/protocol'
 import { urlForOpenPanel } from '../commands/commands'
+import { ActivateConfetti, ActivationStatus } from '../components/Activation'
 import { LinkOrButton } from '../components/LinkOrButton'
 import { ExtensionsControllerProps } from '../extensions/controller'
 import { PlatformContextProps } from '../platform/context'
@@ -58,6 +58,8 @@ export interface ActionItemProps {
 
     /** Instead of showing the icon and/or title, show this element. */
     title?: React.ReactElement<any>
+
+    activation?: ActivationStatus // NEXT: pass this through from the web app...
 }
 
 export interface ActionItemComponentProps
@@ -204,14 +206,20 @@ export class ActionItem extends React.PureComponent<Props, State> {
                 onSelect={this.runAction}
                 ref={this.linkOrButton}
             >
-                {/* Use custom CSS classes instead of Bootstrap CSS classes because this component is also
+                <ActivateConfetti
+                    activation={this.props.activation}
+                    activationKeys={['didCodeIntelligence']}
+                    pauseAndRetrigger={this.retrigger}
+                >
+                    {/* Use custom CSS classes instead of Bootstrap CSS classes because this component is also
             used in the browser extension, which doesn't necessarily have Bootstrap CSS classes defined. */}
-                <div className="action-item__content">{content}</div>
-                {showLoadingSpinner && (
-                    <div className="action-item__loader">
-                        <LoadingSpinner className="icon-inline" />
-                    </div>
-                )}
+                    <div className="action-item__content">{content}</div>
+                    {showLoadingSpinner && (
+                        <div className="action-item__loader">
+                            <LoadingSpinner className="icon-inline" />
+                        </div>
+                    )}
+                </ActivateConfetti>
                 {/*
                 <ActivateConfetti
                     click={{

@@ -247,7 +247,7 @@ interface ActivateConfettiState {
 }
 
 interface ActivateConfettiProps {
-    activation: ActivationStatus
+    activation?: ActivationStatus
     activationKeys: string[]
     pauseAndRetrigger?: () => void
 }
@@ -261,27 +261,29 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
     }
 
     public componentDidMount(): void {
-        this.subscriptions.add(
-            this.props.activation.completed.subscribe(completed => {
-                if (!completed) {
-                    return
-                }
+        if (this.props.activation) {
+            this.subscriptions.add(
+                this.props.activation.completed.subscribe(completed => {
+                    if (!completed) {
+                        return
+                    }
 
-                // Completed list is available, so now determine whether it's activated by looking at what's completed
-                let activated = true
-                for (const k of this.props.activationKeys) {
-                    if (completed[k] === undefined) {
-                        // ignore keys that aren't in completed
-                        continue
+                    // Completed list is available, so now determine whether it's activated by looking at what's completed
+                    let activated = true
+                    for (const k of this.props.activationKeys) {
+                        if (completed[k] === undefined) {
+                            // ignore keys that aren't in completed
+                            continue
+                        }
+                        if (!completed[k]) {
+                            activated = false
+                            break
+                        }
                     }
-                    if (!completed[k]) {
-                        activated = false
-                        break
-                    }
-                }
-                this.setState({ activated })
-            })
-        )
+                    this.setState({ activated })
+                })
+            )
+        }
     }
 
     public componentWillUnmount(): void {
@@ -289,6 +291,9 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
     }
 
     private clicked = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        if (!this.props.activation) {
+            return
+        }
         if (this.state.activated === undefined) {
             return
         }
@@ -308,29 +313,10 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
             setTimeout(this.props.pauseAndRetrigger, 1000)
         }
         this.setState({ activated: true })
-
-        // const update: { [key: string]: boolean } = {}
-        // Object.assign(update, this.props.click.update)
-        // const fetchedTriggers: { [key: string]: boolean } = {}
-        // Object.assign(fetchedTriggers, this.state.fetchedTriggers)
-        // // If the update changes the state, then set activated to true
-        // for (const k of Object.keys(update)) {
-        //     if (!fetchedTriggers[k] && update[k]) {
-        //         // Activate (not activated before)
-        //         refreshUserActivation.next(this.props.click.update)
-        //         this.setState({ activated: true })
-        //         if (this.props.click.pauseAndRetrigger) {
-        //             e.preventDefault()
-        //             e.stopPropagation()
-        //             setTimeout(this.props.click.pauseAndRetrigger, 1000)
-        //         }
-        //         return
-        //     }
-        // }
     }
 
     public render(): JSX.Element | null {
-        return (
+        return this.props.activation ? (
             <div onClick={this.clicked}>
                 {this.state.activated !== undefined && (
                     <Confetti
@@ -351,6 +337,8 @@ export class ActivateConfetti extends React.PureComponent<ActivateConfettiProps,
                 )}
                 {this.props.children}
             </div>
+        ) : (
+            <div>{this.props.children}</div>
         )
     }
 }
