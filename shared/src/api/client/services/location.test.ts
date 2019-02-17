@@ -2,7 +2,11 @@ import { Location } from '@sourcegraph/extension-api-types'
 import { Observable, of, throwError } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
 import { TextDocumentRegistrationOptions } from '../../protocol'
-import { getLocations, ProvideTextDocumentLocationSignature, TextDocumentLocationProviderRegistry } from './location'
+import {
+    getLocationsFromProviders,
+    ProvideTextDocumentLocationSignature,
+    TextDocumentLocationProviderRegistry,
+} from './location'
 import { Entry } from './registry'
 import { FIXTURE } from './registry.test'
 
@@ -91,12 +95,12 @@ describe('TextDocumentLocationProviderRegistry', () => {
     })
 })
 
-describe('getLocations', () => {
+describe('getLocationsFromProviders', () => {
     describe('0 providers', () => {
         test('returns null', () =>
             scheduler().run(({ cold, expectObservable }) =>
                 expectObservable(
-                    getLocations(
+                    getLocationsFromProviders(
                         cold<ProvideTextDocumentLocationSignature[]>('-a-|', { a: [] }),
                         FIXTURE.TextDocumentPositionParams
                     )
@@ -110,7 +114,7 @@ describe('getLocations', () => {
         test('returns null result from provider', () =>
             scheduler().run(({ cold, expectObservable }) =>
                 expectObservable(
-                    getLocations(
+                    getLocationsFromProviders(
                         cold<ProvideTextDocumentLocationSignature[]>('-a-|', { a: [() => of(null)] }),
                         FIXTURE.TextDocumentPositionParams
                     )
@@ -122,7 +126,7 @@ describe('getLocations', () => {
         test('returns result array from provider', () =>
             scheduler().run(({ cold, expectObservable }) =>
                 expectObservable(
-                    getLocations(
+                    getLocationsFromProviders(
                         cold<ProvideTextDocumentLocationSignature[]>('-a-|', {
                             a: [() => of(FIXTURE_LOCATIONS)],
                         }),
@@ -137,7 +141,7 @@ describe('getLocations', () => {
     test('errors do not propagate', () =>
         scheduler().run(({ cold, expectObservable }) =>
             expectObservable(
-                getLocations(
+                getLocationsFromProviders(
                     cold<ProvideTextDocumentLocationSignature[]>('-a-|', {
                         a: [() => of(FIXTURE_LOCATION), () => throwError('x')],
                     }),
@@ -153,7 +157,7 @@ describe('getLocations', () => {
         test('returns null result if both providers return null', () =>
             scheduler().run(({ cold, expectObservable }) =>
                 expectObservable(
-                    getLocations(
+                    getLocationsFromProviders(
                         cold<ProvideTextDocumentLocationSignature[]>('-a-|', {
                             a: [() => of(null), () => of(null)],
                         }),
@@ -167,7 +171,7 @@ describe('getLocations', () => {
         test('omits null result from 1 provider', () =>
             scheduler().run(({ cold, expectObservable }) =>
                 expectObservable(
-                    getLocations(
+                    getLocationsFromProviders(
                         cold<ProvideTextDocumentLocationSignature[]>('-a-|', {
                             a: [() => of(FIXTURE_LOCATIONS), () => of(null)],
                         }),
@@ -181,7 +185,7 @@ describe('getLocations', () => {
         test('merges results from providers', () =>
             scheduler().run(({ cold, expectObservable }) =>
                 expectObservable(
-                    getLocations(
+                    getLocationsFromProviders(
                         cold<ProvideTextDocumentLocationSignature[]>('-a-|', {
                             a: [
                                 () =>
@@ -217,7 +221,7 @@ describe('getLocations', () => {
         test('returns stream of results', () =>
             scheduler().run(({ cold, expectObservable }) =>
                 expectObservable(
-                    getLocations(
+                    getLocationsFromProviders(
                         cold<ProvideTextDocumentLocationSignature[]>('-a-b-|', {
                             a: [() => of(FIXTURE_LOCATIONS)],
                             b: [() => of(null)],
