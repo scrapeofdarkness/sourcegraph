@@ -1,7 +1,9 @@
 import { Location } from '@sourcegraph/extension-api-types'
-import { of, throwError } from 'rxjs'
+import { Observable, of, throwError } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
-import { getLocations, ProvideTextDocumentLocationSignature } from './location'
+import { TextDocumentRegistrationOptions } from '../../protocol'
+import { getLocations, ProvideTextDocumentLocationSignature, TextDocumentLocationProviderRegistry } from './location'
+import { Entry } from './registry'
 import { FIXTURE } from './registry.test'
 
 const scheduler = () => new TestScheduler((a, b) => expect(a).toEqual(b))
@@ -11,6 +13,83 @@ const FIXTURE_LOCATION: Location = {
     range: { start: { line: 1, character: 2 }, end: { line: 3, character: 4 } },
 }
 const FIXTURE_LOCATIONS: Location | Location[] | null = [FIXTURE_LOCATION, FIXTURE_LOCATION]
+
+/**
+ * Allow overriding {@link TextDocumentLocationProviderRegistry#entries} for tests.
+ */
+class TestTextDocumentLocationProviderRegistry extends TextDocumentLocationProviderRegistry {
+    constructor(entries?: Observable<Entry<TextDocumentRegistrationOptions, ProvideTextDocumentLocationSignature>[]>) {
+        super()
+        if (entries) {
+            entries.subscribe(entries => this.entries.next(entries))
+        }
+    }
+}
+
+describe('TextDocumentLocationProviderRegistry', () => {
+    describe('hasProvidersForActiveTextDocument', () => {
+        test('false if no position params', () => {
+            scheduler().run(({ cold, expectObservable }) => {
+                const registry = new TestTextDocumentLocationProviderRegistry(
+                    cold<Entry<TextDocumentRegistrationOptions, ProvideTextDocumentLocationSignature>[]>('a', {
+                        a: [{ provider: () => of(null), registrationOptions: { documentSelector: ['*'] } }],
+                    })
+                )
+                expectObservable(registry.hasProvidersForActiveTextDocument({ visibleViewComponents: [] })).toBe('a', {
+                    a: false,
+                })
+            })
+        })
+
+        test('true if matching document', () => {
+            scheduler().run(({ cold, expectObservable }) => {
+                const registry = new TestTextDocumentLocationProviderRegistry(
+                    cold<Entry<TextDocumentRegistrationOptions, ProvideTextDocumentLocationSignature>[]>('a', {
+                        a: [{ provider: () => of(null), registrationOptions: { documentSelector: ['l'] } }],
+                    })
+                )
+                expectObservable(
+                    registry.hasProvidersForActiveTextDocument({
+                        visibleViewComponents: [
+                            {
+                                isActive: true,
+                                type: 'textEditor',
+                                selections: [],
+                                item: { uri: 'u', languageId: 'l', text: 't' },
+                            },
+                        ],
+                    })
+                ).toBe('a', {
+                    a: false,
+                })
+            })
+        })
+
+        test('false if no matching document', () => {
+            scheduler().run(({ cold, expectObservable }) => {
+                const registry = new TestTextDocumentLocationProviderRegistry(
+                    cold<Entry<TextDocumentRegistrationOptions, ProvideTextDocumentLocationSignature>[]>('a', {
+                        a: [{ provider: () => of(null), registrationOptions: { documentSelector: ['otherlang'] } }],
+                    })
+                )
+                expectObservable(
+                    registry.hasProvidersForActiveTextDocument({
+                        visibleViewComponents: [
+                            {
+                                isActive: true,
+                                type: 'textEditor',
+                                selections: [],
+                                item: { uri: 'u', languageId: 'l', text: 't' },
+                            },
+                        ],
+                    })
+                ).toBe('a', {
+                    a: false,
+                })
+            })
+        })
+    })
+})
 
 describe('getLocations', () => {
     describe('0 providers', () => {

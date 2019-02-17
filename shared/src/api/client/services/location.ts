@@ -1,5 +1,5 @@
 import { Location } from '@sourcegraph/extension-api-types'
-import { combineLatest, from, Observable, of } from 'rxjs'
+import { from, Observable } from 'rxjs'
 import { catchError, map, switchMap } from 'rxjs/operators'
 import { combineLatestOrDefault } from '../../../util/rxjs/combineLatestOrDefault'
 import { ReferenceParams, TextDocumentPositionParams, TextDocumentRegistrationOptions } from '../../protocol'
@@ -29,29 +29,26 @@ export class TextDocumentLocationProviderRegistry<
         return getLocations<P, L>(this.providersForDocument(params.textDocument), params)
     }
 
-    public getLocationsAndProviders(
-        model: Observable<Pick<Model, 'visibleViewComponents'>>,
-        extraParams?: Pick<P, Exclude<keyof P, keyof TextDocumentPositionParams>>
-    ): Observable<{ locations: Observable<Location[] | null> | null; hasProviders: boolean }> {
-        return combineLatest(this.entries, model).pipe(
-            map(([entries, { visibleViewComponents }]) => {
-                const params = modelToTextDocumentPositionParams({ visibleViewComponents })
+    /**
+     * Reports whether there are any location providers registered for the active text document.
+     * This can be used, for example, to selectively show a "Find references" button if there are
+     * any reference providers registered.
+     *
+     * @param model The current model.
+     */
+    public hasProvidersForActiveTextDocument(model: Pick<Model, 'visibleViewComponents'>): Observable<boolean> {
+        return this.entries.pipe(
+            map(entries => {
+                const params = modelToTextDocumentPositionParams(model)
                 if (!params) {
-                    return { locations: null, hasProviders: false }
+                    return false
                 }
 
-                const providers = entries
-                    .filter(({ registrationOptions }) =>
+                return (
+                    entries.filter(({ registrationOptions }) =>
                         match(registrationOptions.documentSelector, params.textDocument)
-                    )
-                    .map(({ provider }) => provider)
-                return {
-                    locations: getLocations<P, L>(of(providers), {
-                        ...(params as Pick<P, keyof TextDocumentPositionParams>),
-                        ...(extraParams as Pick<P, Exclude<keyof P, 'textDocument' | 'position'>>),
-                    } as P),
-                    hasProviders: providers.length > 0,
-                }
+                    ).length > 0
+                )
             })
         )
     }

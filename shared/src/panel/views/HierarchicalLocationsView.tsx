@@ -88,8 +88,7 @@ export class HierarchicalLocationsView extends React.PureComponent<HierarchicalL
                                     'panel.locations.hasResults':
                                         locationsOrError &&
                                         !isErrorLike(locationsOrError) &&
-                                        !locationsOrError.loading &&
-                                        (locationsOrError.results || false) &&
+                                        !!locationsOrError.results &&
                                         locationsOrError.results.length > 0,
                                 })
                             }),
@@ -120,7 +119,10 @@ export class HierarchicalLocationsView extends React.PureComponent<HierarchicalL
         if (isErrorLike(this.state.locationsOrError)) {
             return <FileLocationsError error={this.state.locationsOrError} />
         }
-        if (this.state.locationsOrError.loading) {
+        if (
+            this.state.locationsOrError.loading &&
+            (!this.state.locationsOrError.results || this.state.locationsOrError.results.length === 0)
+        ) {
             return <LoadingSpinner className="icon-inline m-1" />
         }
         if (this.state.locationsOrError.results && this.state.locationsOrError.results.length === 0) {
