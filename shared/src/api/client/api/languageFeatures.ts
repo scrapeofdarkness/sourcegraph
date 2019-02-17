@@ -70,7 +70,7 @@ export class ClientLanguageFeatures implements ClientLanguageFeaturesAPI {
             id,
             this.definitionRegistry.registerProvider(
                 { documentSelector: selector },
-                (params: TextDocumentPositionParams): Observable<Location | Location[]> =>
+                (params: TextDocumentPositionParams): Observable<Location[]> =>
                     from(this.proxy.$observeDefinition(id, params.textDocument.uri, params.position)).pipe(
                         map(result => result || [])
                     )
@@ -83,7 +83,7 @@ export class ClientLanguageFeatures implements ClientLanguageFeaturesAPI {
             id,
             this.typeDefinitionRegistry.registerProvider(
                 { documentSelector: selector },
-                (params: TextDocumentPositionParams): Observable<Location | Location[]> =>
+                (params: TextDocumentPositionParams): Observable<Location[]> =>
                     from(this.proxy.$observeTypeDefinition(id, params.textDocument.uri, params.position)).pipe(
                         map(result => result || [])
                     )
@@ -96,7 +96,7 @@ export class ClientLanguageFeatures implements ClientLanguageFeaturesAPI {
             id,
             this.implementationRegistry.registerProvider(
                 { documentSelector: selector },
-                (params: TextDocumentPositionParams): Observable<Location | Location[]> =>
+                (params: TextDocumentPositionParams): Observable<Location[]> =>
                     from(this.proxy.$observeImplementation(id, params.textDocument.uri, params.position)).pipe(
                         map(result => result || [])
                     )
