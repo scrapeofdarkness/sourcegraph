@@ -101,11 +101,32 @@ We treat documentation as code, so we've implemented some testing:
 
 - `docsite check`: Check that all internal (relative) links work correctly.
 
-## Previewing the changes live
+## Updating documentation
 
-When running Sourcegraph in development mode, you can access a live preview of the docs at http://localhost:3080/help. The Markdown rendering and structure is the same as on docs.sourcegraph.com.
+To update documentation content, templates, or assets on https://docs.sourcegraph.com, push changes in the `doc/` directory to this repository's `master` branch, then wait up to 5 minutes. Every 5 minutes, docs.sourcegraph.com reloads all content, templates, and assets from `master`.
 
-You can also follow the [sourcegraph/docs.sourcegraph.com README](https://github.com/sourcegraph/docs.sourcegraph.com) to run the docs.sourcegraph.com site locally.
+- Documentation content lives in `doc/**/*.md`.
+- Assets and templates live in `doc/_resources/{templates,assets}`.
+
+If you can't wait 5 minutes and need to force a reload, you can kill the `docs-sourcegraph-com-*` Kubernetes pod on the Sourcegraph.com Kubernetes cluster. (It will restart and come back online with the latest data.)
+
+### Previewing changes locally
+
+When running Sourcegraph in [local development](../local_development.md) (using `dev/launch.sh` or `enterprise/dev/start.sh`), you can view the documentation site at http://localhost:5080. It uses content, templates, and assets from the local disk. There is no caching or background build process, so you'll see changes reflected immediately after you reload the page in your browser.
+
+#### Running multi-version support locally (rarely needed)
+
+The [local documentation preview server](#previewing-changes-locally) described above usually suffices because usually you only need to view the current doc content (on disk). If you're working on a docs template change involving multiple content versions (i.e., doc site URL paths like `/@v1.2.3/my/doc/page`), then you must run a [docsite](https://github.com/sourcegraph/docsite) server that can read multiple content versions:
+
+``` shell
+DOCSITE_CONFIG='{"templates":"doc/_resources/templates","assets":"doc/_resources/assets","content":"https://codeload.github.com/sourcegraph/sourcegraph/zip/$VERSION#*/doc/","baseURLPath":"/","assetsBaseURLPath":"/assets/"}' .bin/docsite serve -http=localhost:5081
+```
+
+TODO!(sqs): make docs.sourcegraph.com use templates/assets from master ALWAYS, not be versioned
+
+This runs a docsite server on http://localhost:5081 that reads templates and assets from disk (so yo can see your changes reflected immediately upon page reload) but reads content from the remote Git repository at any version (by default `master` if no version is given in the URL path, as in `/@v1.2.3/my/doc/page`).
+
+If you want to run the doc site *exactly* as it's deployed (reading templates and assets from the remote Git repository, too), consult the current Kubernetes deployment spec and use its `DOCSITE_CONFIG` env var.
 
 ## Linking to documentation in-product
 
