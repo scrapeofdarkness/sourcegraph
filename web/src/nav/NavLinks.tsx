@@ -11,17 +11,18 @@ import { PlatformContextProps } from '../../../shared/src/platform/context'
 import { SettingsCascadeProps } from '../../../shared/src/settings/settings'
 import { isDiscussionsEnabled } from '../discussions'
 import { KeybindingsProps } from '../keybindings'
+import { ThemePreferenceProps, ThemeProps } from '../theme'
 import { UserNavItem } from './UserNavItem'
 
 interface Props
     extends SettingsCascadeProps,
         KeybindingsProps,
         ExtensionsControllerProps<'executeCommand' | 'services'>,
-        PlatformContextProps<'forceUpdateTooltip'> {
+        PlatformContextProps<'forceUpdateTooltip'>,
+        ThemeProps,
+        ThemePreferenceProps {
     location: H.Location
     authenticatedUser: GQL.IUser | null
-    isLightTheme: boolean
-    onThemeChange: () => void
     showDotComMarketing: boolean
 }
 
@@ -57,13 +58,7 @@ export class NavLinks extends React.PureComponent<Props> {
                         </a>
                     </li>
                 )}
-                <ActionsNavItems
-                    menu={ContributableMenu.GlobalNav}
-                    actionItemClass="nav-link"
-                    extensionsController={this.props.extensionsController}
-                    platformContext={this.props.platformContext}
-                    location={this.props.location}
-                />
+                <ActionsNavItems {...this.props} menu={ContributableMenu.GlobalNav} actionItemClass="nav-link" />
                 {(!this.props.showDotComMarketing ||
                     !!this.props.authenticatedUser ||
                     this.props.location.pathname !== '/welcome') && (
@@ -107,11 +102,9 @@ export class NavLinks extends React.PureComponent<Props> {
                 )}
                 {this.props.location.pathname !== '/welcome' && (
                     <CommandListPopoverButton
+                        {...this.props}
                         menu={ContributableMenu.CommandPalette}
-                        extensionsController={this.props.extensionsController}
-                        platformContext={this.props.platformContext}
                         toggleVisibilityKeybinding={this.props.keybindings.commandPalette}
-                        location={this.props.location}
                     />
                 )}
                 {this.props.authenticatedUser && (

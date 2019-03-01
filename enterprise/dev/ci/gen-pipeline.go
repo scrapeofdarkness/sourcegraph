@@ -92,7 +92,6 @@ func main() {
 			bk.Cmd("./dev/ci/ci-db-backcompat.sh"))
 
 		pipeline.AddStep(":go:",
-			bk.Cmd("yarn"),
 			bk.Cmd("./cmd/symbols/build.sh buildLibsqlite3Pcre"), // for symbols tests
 			bk.Cmd("go test -coverprofile=coverage.txt -covermode=atomic -race ./..."),
 			bk.ArtifactPaths("coverage.txt"))
@@ -241,65 +240,20 @@ func main() {
 
 	pipeline.AddWait()
 
-	// TODO@ggilmore: disabled until the follow up work in https://github.com/sourcegraph/sourcegraph/issues/976
-	// is completed.
-	// fetchClusterCredentials := func(name, zone, project string) bk.StepOpt {
-	// 	return bk.Cmd(fmt.Sprintf("gcloud container clusters get-credentials %s --zone %s --project %s", name, zone, project))
-	// }
-
-	addDeploySteps := func() {
-		// Deploy to dogfood
-		// TODO@ggilmore: disabled until the follow up work in https://github.com/sourcegraph/sourcegraph/issues/976
-		// is completed.
-		// pipeline.AddStep(":dog:",
-		// 	// Protect against concurrent/out-of-order deploys
-		// 	bk.ConcurrencyGroup("deploy"),
-		// 	bk.Concurrency(1),
-		// 	bk.Env("VERSION", version),
-		// 	bk.Env("CONTEXT", "gke_sourcegraph-dev_us-central1-a_dogfood-cluster-7"),
-		// 	bk.Env("NAMESPACE", "default"),
-		// 	fetchClusterCredentials("dogfood-cluster-7", "us-central1-a", "sourcegraph-dev"),
-		// 	bk.Cmd("./dev/ci/deploy-dogfood.sh"))
-		// pipeline.AddWait()
-
-		// Run e2e tests against dogfood
-		// TODO@ggilmore: disabled until the follow up work in https://github.com/sourcegraph/sourcegraph/issues/976
-		// is completed.
-		// pipeline.AddStep(":chromium:",
-		// 	// Protect against deploys while tests are running
-		// 	bk.ConcurrencyGroup("deploy"),
-		// 	bk.Concurrency(1),
-		// 	bk.Env("PUPPETEER_SKIP_CHROMIUM_DOWNLOAD", ""),
-		// 	bk.Cmd("yarn cache clean puppeteer"), // ensure it's downloaded even if the package was cached w/o downloading
-		// 	bk.Cmd("yarn --frozen-lockfile --network-timeout 60000"),
-		// 	bk.Cmd("pushd web"),
-		// 	bk.Cmd("yarn -s run test-e2e-sgdev --retries 5"),
-		// 	bk.Cmd("popd"),
-		// 	bk.ArtifactPaths("./puppeteer/*.png"))
-		// pipeline.AddWait()
-
-		// Deploy to prod
-		// TODO@ggilmore: disabled until the follow up work in https://github.com/sourcegraph/sourcegraph/issues/976
-		// is completed.
-		// pipeline.AddStep(":rocket:",
-		// 	bk.Env("VERSION", version),
-		// 	bk.Cmd("./dev/enterprise/ci/deploy-prod.sh"))
+	allDockerImages := []string{
+		"frontend",
+		"github-proxy",
+		"gitserver",
+		"management-console",
+		"query-runner",
+		"repo-updater",
+		"searcher",
+		"server",
+		"symbols",
 	}
 
 	switch {
 	case taggedRelease:
-		allDockerImages := []string{
-			"frontend",
-			"github-proxy",
-			"gitserver",
-			"management-console",
-			"query-runner",
-			"repo-updater",
-			"searcher",
-			"server",
-			"symbols",
-		}
-
 		for _, dockerImage := range allDockerImages {
 			addDockerImageStep(dockerImage, false)
 		}
@@ -310,26 +264,20 @@ func main() {
 		pipeline.AddWait()
 
 	case branch == "master":
-		addDockerImageStep("frontend", true)
-		addDockerImageStep("server", true)
+		for _, dockerImage := range allDockerImages {
+			addDockerImageStep(dockerImage, true)
+		}
 		pipeline.AddWait()
-		addDeploySteps()
 
 	case strings.HasPrefix(branch, "master-dry-run/"): // replicates `master` build but does not deploy
-		addDockerImageStep("frontend", true)
-		addDockerImageStep("server", true)
+		for _, dockerImage := range allDockerImages {
+			addDockerImageStep(dockerImage, true)
+		}
 		pipeline.AddWait()
 
 	case strings.HasPrefix(branch, "docker-images-patch/"):
 		version = version + "_patch"
 		addDockerImageStep(branch[20:], false)
-
-	case strings.HasPrefix(branch, "docker-images/"):
-		// Only deploy images that aren't auto deployed from master.
-		if branch != "docker-images/server" && branch != "docker-images/frontend" {
-			addDockerImageStep(branch[14:], true)
-			pipeline.AddWait()
-			addDeploySteps()
-		}
+		pipeline.AddWait()
 	}
 }

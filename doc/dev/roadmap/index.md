@@ -10,28 +10,7 @@ We welcome suggestions! Share feedback by using [code discussions](https://about
 
 ## Future releases
 
-### 3.1
-
-Release date: 2019-02-20
-
-Core Services:
-
-- [Upgrade to PostgreSQL 10.6](https://github.com/sourcegraph/sourcegraph/issues/1404)
-
-Code search and navigation:
-
-- Non-precise code intelligence improvements 
-- [Code navigation UX and robustness](https://github.com/sourcegraph/sourcegraph/issues/2070)
-- [Search UX](https://github.com/sourcegraph/sourcegraph/issues/2081)
-
-
-<small>[All 3.1 issues](https://github.com/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+archived%3Afalse+sort%3Aupdated-desc+org%3Asourcegraph+milestone%3A3.1)</small>
-
----
-
 ### 3.2
-
-TODO: We are currently planning 3.2.
 
 Release date: 2019-03-20
 
@@ -41,11 +20,33 @@ Core services:
 
 Distribution:
 
-- Automate cloud provider deployment process
+- [Improve cloud provider deployment process](https://github.com/sourcegraph/sourcegraph/issues/2068)
 - [Improve scaling documentation](https://github.com/sourcegraph/sourcegraph/issues/2019)
 - [Instance activation flow for site admins](https://github.com/sourcegraph/sourcegraph/issues/2069)
-- Docs UX (TBD)
-- [Better docs for setting up an instance ready for sharing](https://github.com/sourcegraph/sourcegraph/issues/2277) (TBD)
+- [Documentation UX and content improvements](https://github.com/sourcegraph/sourcegraph/issues/2023)
+
+Code search:
+
+- [Search UX](https://github.com/sourcegraph/sourcegraph/issues/2081)
+
+Code navigation:
+
+- [Integrations quality](https://github.com/sourcegraph/sourcegraph/issues/2380)
+- [Code intelligence](https://github.com/sourcegraph/sourcegraph/issues/2452)
+
+### 3.3
+
+Release date: 2019-04-20
+
+> NOTE: Planning for 3.3 is in progress. This list is not complete. Feedback? We'd love to hear from you.
+
+Core services:
+
+- [Keep repository set in sync with config](https://github.com/sourcegraph/sourcegraph/issues/2025) (for code hosts other than GitHub)
+
+Distribution:
+
+- TBD
 
 Code search:
 
@@ -53,8 +54,9 @@ Code search:
 
 Code navigation:
 
-- Integrations foundation (details TBD)
-- Code intelligence (details TBD)
+- Integrations quality (TBD)
+- Code intelligence (TBD)
+
 
 ---
 
@@ -75,12 +77,13 @@ Code intelligence and navigation
 - [Flow (JavaScript) language support](https://github.com/sourcegraph/sourcegraph/issues/982)
 - [Scoped symbols sidebar](https://github.com/sourcegraph/sourcegraph/issues/1967)
 - PHP language support via extension
+- Bazel support
 
 Sourcegraph extensions
 
 - [Extension registry discovery and statistics](https://github.com/sourcegraph/sourcegraph/issues/980)
-- Codecov extension
-- More 3rd-party extensions: Sentry, FOSSA, SonarQube, [LaunchDarkly](https://github.com/sourcegraph/sourcegraph/issues/1249), Figma
+- Enhanced extensions for Codecov and Datadog
+- New 3rd-party extensions: Sentry, LightStep, FOSSA, SonarQube, [LaunchDarkly](https://github.com/sourcegraph/sourcegraph/issues/1249), Figma, etc.
 - [Configuration data search extension](https://github.com/sourcegraph/sourcegraph/issues/670)
 - Improved code host support for Sourcegraph extensions
 - [Using Sourcegraph extensions in the editor](https://github.com/sourcegraph/sourcegraph/issues/978)
@@ -92,6 +95,7 @@ Other
 - [Checklist-based repository reviews](https://github.com/sourcegraph/sourcegraph/issues/1526)
 - [Browser authorization flow for clients](https://github.com/sourcegraph/sourcegraph/pull/528)
 - Enhanced notification preferences
+- Support for non-Git version control systems (Perforce, Subversion, TFS, etc.)
 - API access logging
 
 ---
