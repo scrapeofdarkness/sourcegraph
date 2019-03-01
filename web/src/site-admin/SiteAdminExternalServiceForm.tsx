@@ -57,6 +57,58 @@ export class SiteAdminExternalServiceForm extends React.Component<Props, {}> {
                         ))}
                     </Select>
                 </div>
+                <div>
+                    <div
+                        style={{
+                            border: '2px solid yellow',
+                            borderRadius: '5px',
+                            padding: '0.5rem 1rem',
+                        }}
+                    >
+                        <p>
+                            There are still remaining things to do:
+                            <ul>
+                                <li>Add a personal access token</li>
+                                <li>Add at least one repository</li>
+                            </ul>
+                        </p>
+                        For help setting the configuration, see the <a href="#">GitLab integration documentation</a> to
+                        learn more or use the common action buttons below.
+                    </div>
+                    <p />
+                    <div>
+                        {/* TODO: this needs to feel "attached" to the config text area */}
+                        <span data-tooltip="Use common actions to quickly edit the config. The external service will not be updated until the configuration is saved.">
+                            Common actions:&nbsp;
+                        </span>
+                        <select>
+                            {/* Default to the next action */}
+                            <option>Set personal access token</option>
+                            <option>Set individual repositories to mirror</option>
+                            <option>Add all repositories from an organization</option>
+                        </select>
+                        {/*
+                        <div>
+                            <p style={{ marginLeft: '4rem', marginTop: '1rem' }}>
+                                <label>Personal access token: </label>
+                                <input />
+                                <br />
+                                <button>Update configuration</button>
+                            </p>
+                        </div>
+                        */}
+                        {/*
+                        // NEXT:
+                        // - make this a dropdown that modifies a form.
+                        // - one-way sync only for "add", two-way sync for "set"
+                        // - should include external instructions to (link to them in the list of steps)
+                        // - all submit button text is "Update configuration box" < shouldn't update service until you click "Update service" (maybe rename to "Save")
+                        // - undo (ctrl-z) should work
+                        // - configuration box should animate when updated
+                            */}
+                    </div>
+                    <p />
+                </div>
                 <div className="form-group">
                     <DynamicallyImportedMonacoSettingsEditor
                         // DynamicallyImportedMonacoSettingsEditor does not re-render the passed input.config
