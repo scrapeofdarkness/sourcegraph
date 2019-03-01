@@ -64,7 +64,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/joho/godotenv v1.3.0
 	github.com/jonboulle/clockwork v0.1.0 // indirect
-	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
+	github.com/kardianos/osext v0.0.0-20190301082327-2bc1f35cddc0
 	github.com/karrick/tparse v2.4.2+incompatible
 	github.com/keegancsmith/rpc v1.1.0
 	github.com/keegancsmith/sqlf v1.1.0
