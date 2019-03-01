@@ -37,10 +37,31 @@ export interface ActivationProps {
  * One step in the activation status.
  */
 export interface ActivationStep {
+    /**
+     * The identifier for the activation step
+     */
     id: string
+
+    /**
+     * The title of the step to display in the activation dropdown
+     */
     title: string
+
+    /**
+     * Description of the step displayed in a popover
+     */
     detail: string
+
+    /**
+     * If set, the user should be navigated to the given link when
+     * attempting to complete this step.
+     */
     link?: LinkProps
+
+    /**
+     * If set, the handler should be invoked when the user attempts
+     * to complete this step.
+     */
     onClick?: (event: React.MouseEvent<HTMLElement>, history: H.History) => void
 }
 
