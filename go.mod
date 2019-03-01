@@ -130,7 +130,7 @@ require (
 	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
 	golang.org/x/time v0.0.0-20190104202802-85acf8d2951c
 	golang.org/x/tools v0.0.0-20190214204934-8dcb7bc8c7fe
-	google.golang.org/genproto v0.0.0-20190215211957-bd968387e4aa // indirect
+	google.golang.org/genproto v0.0.0-20190301093148-4f5b463f9597 // indirect
 	google.golang.org/grpc v1.18.0 // indirect
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
 	gopkg.in/inconshreveable/log15.v2 v2.0.0-20180818164646-67afb5ed74ec
