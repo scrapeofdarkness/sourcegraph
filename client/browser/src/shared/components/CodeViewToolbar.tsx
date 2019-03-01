@@ -61,7 +61,7 @@ export class CodeViewToolbar extends React.Component<CodeViewToolbarProps, CodeV
                         extensionsController={this.props.extensionsController}
                         platformContext={this.props.platformContext}
                         listItemClass="BtnGroup"
-                        actionItemClass="btn btn-sm tooltipped tooltipped-n BtnGroup-item"
+                        actionItemClass="btn btn-sm tooltipped tooltipped-s BtnGroup-item action-item--github"
                         actionItemPressedClass="selected btn-pressed"
                         location={this.props.location}
                         scope={{
